@@ -59,7 +59,7 @@ sudo apachectl restart
 philoload4 -l Classics_load_config.py My_Load_Name /path/to/my/*.xml
 ```
 - Make sure to open the PhiloLogic4.6 load in a browser before the next step.
-- Now run the *fix_load.py* script (you should already be in the *load* directory in the Philo4Classics directory). By default, the fix "type" is "text", which is valid for almost all types of PhiloLogic 4.6 loads, except for dictionaries.
+- Now run the *classicize.py* script (you should already be in the *load* directory in the Philo4Classics directory). By default, the fix "type" is "text", which is valid for almost all types of PhiloLogic 4.6 loads, except for dictionaries.
 ```bash
-./fix_load.py My_Load_Name
+./classicize.py My_Load_Name
 ```

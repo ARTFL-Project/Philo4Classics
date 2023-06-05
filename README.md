@@ -8,7 +8,7 @@ If you are having trouble installing PhiloLogic 4.6, you can check our installat
 Included:
 
 - custom runtime and loadtime functions
-- a `fix_load.py` script which makes common adjustments to the PhiloLogic 4.6 app
+- a `classicize.py` script which makes common adjustments to the PhiloLogic 4.6 app
 
 ## Usage
 
@@ -29,16 +29,16 @@ cd /path/to/Philo4Classics/load
 philoload4 -l Classics_load_config.py MyNewLoad /path/to/my/file*.xml
 ```
 
-Make sure that you set the correct path for `philologic_path` in `fix_load.py`.
+Make sure that you set the correct path for `philologic_path` in `classicize.py`.
 
 ```python
 philologic_path="/var/www/html/philologic4/"
 ```
 
-Unless there are good reasons, the `fix_load.py` script should be run after all Philo4Classics custom loads, *but before you do so, make sure to try to load the database in a browser first so that the PhiloLogic4 app initializes certain files:*
+Unless there are good reasons, the `classicize.py` script should be run after all Philo4Classics custom loads, *but before you do so, make sure to try to load the database in a browser first so that the PhiloLogic4 app initializes certain files:*
 
 ```bash
-./fix_load.py MyLoad # parameters are optional
+./classicize.py MyLoad # parameters are optional
 ```
 
 - the optional parameters are "dictionary" and "text" to be used with dictionary loads and text loads, respectively (if not sure, use the "text" parameter)
