@@ -228,7 +228,7 @@ abbrevs_files = glob.glob("../custom_functions/*abbrevs")
 
 #print ("Abbreviation File Choices: ", end = "")
 abbrevs_choices = [re.sub(r"^.*\/", "", i) for i in abbrevs_files]
-if "Lat" in myload: abbrevs_file = "Lat16.abbrevs"
+if "Lat" in myload: abbrevs_file = "Latin.abbrevs"
 if len(abbrevs_choices) > 1:
     abbrevs_file = user_inputchoices("Which abbrevs file do you want to use? [%s] ",  abbrevs_file, abbrevs_choices)
 
