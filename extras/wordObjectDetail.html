@@ -1,0 +1,80 @@
+<div id="wordProperty" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="wordPropertyLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		<h4 style="display: inline;" class="modal-title" id="wordObjectDetail">Parsing <b>{{wordProperties.token}}</b></h4> <h5 style="display: inline;">(word {{wordProperties.tokenid}})</h5>
+            </div>
+			<a href="{{ wordProperties.problem_report }}" class="btn btn-default btn-xs pull-right" role="button" style="border-width: 0px 0px 1px 1px !important; margin-right: 2px;color: inherit; position: absolute; z-index: 100;right: 0;">
+				 Report a problem
+			</a>
+            <div class="modal-body">
+		    <h5><b>{{ wordProperties.lemma }}</b> (Look up in <a href="{{wordProperties.dictionary_lookup}}" target="_blank"><b>{{wordProperties.dictionary_name}}</b></a>)<span style="padding-left: 5px">{{wordProperties.blesslemma}}</span></h5>
+				<div class="panel panel-default">
+					<ol style="margin-bottom: 0px">
+						<li>
+						<div class="row" style="padding: 10px">
+							<div class="col-xs-12">
+									<i>{{wordProperties.properties[0].value}}</i>
+							</div>
+						</div>
+						</li>
+
+						<li ng-style="wordProperties.authority && {'background-color':'#DDFFDD'} || !wordProperties.authority && {'background-color':'#DDDDFF'}">
+						<div class="row" style="padding: 10px">
+							<div class="col-xs-12">
+								{{ wordProperties.properties[1].value }}
+								{{ wordProperties.authority }}
+								<div ng-if="wordProperties.properties[2].value" style="display: inline;"> (cp. <a href="https://logeion.uchicago.edu/{{wordProperties.properties[2].value}}" target="_blank"><b>{{wordProperties.properties[2].value}}</b></a>)</div>
+							</div>
+						</div>
+						</li>
+
+						<div ng-if="wordProperties.alt_parses.length" style="margin-top: 0px;">
+							<div ng-repeat="altParse in wordProperties.alt_parses" ng-if="altParse.lemma == wordProperties.lemma">
+								<li ng-repeat="altPos in altParse.parse" ng-if="wordProperties.properties[1].value.indexOf(altPos[0]) === -1">
+									<div class="row" style="padding: 3px 10px; font-size: 90%;">
+										<div class="col-xs-12">
+										{{ altPos[0] }}
+										<div ng-if="altPos[2]" style="display: inline;"> (cp. <a href="https://logeion.uchicago.edu/{{altPos[2]}}" target="_blank"><b>{{altPos[2]}}</b></a>)</div>
+										<div ng-if="altPos[3]" style="display: inline;"> (<b>{{altPos[3]}}</b>)</div>
+										</div>
+									</div>
+								</li>
+							</div>
+						</div>
+					</ol>
+				</div>
+				<div ng-if="wordProperties.alt_parses.length" style="margin-top: 30px;">
+					<!--h4 style="padding-bottom: 10px;"> Other possible parses: </h4--!>
+					<div ng-repeat="altParse in wordProperties.alt_parses">
+						<div ng-if="altParse.lemma != wordProperties.lemma">
+						<h5><b>{{ altParse.lemma }}</b> (Look  up in <a href="{{altParse.dictionary_lookup}}" target="_blank"><b>{{wordProperties.dictionary_name}}</b></a>)</h5>
+						<div class="panel panel-default">
+							<ol style="margin-bottom: 0px">
+							<div>
+								<li ng-if="altParse.parse[0][1]">
+									<div class="row" style="padding: 10px">
+										<div class="col-xs-12">
+										<i>{{altParse.parse[0][1]}}</i>	
+										</div>
+									</div>
+								</li>
+							</div>
+								<li ng-repeat="altPos in altParse.parse">
+									<div class="row" style="padding: 3px 10px; font-size: 90%;">
+										<!--div ng-repeat="wordProperty in altPos" class="col-xs-6"--!>
+										<div class="col-xs-6">
+											{{ altPos[0] }}
+										</div>
+									</div>
+								</li>
+							</ol>
+						</div>
+						</div>
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
