@@ -247,6 +247,10 @@ if type_of_fix == "dictionary" and not Greek_load and not Latin_load:
     if user_choice.lower().startswith('n'):
         sys.exit()
 
+# Add missing final slashes
+if Greek_load and not Greek_load.endswith('/'): Greek_load += "/"
+if Latin_load and not Latin_load.endswith('/'): Latin_load += "/"
+
 #################################################
 ###          Paths of Files to Edit           ###
 #################################################
