@@ -3,13 +3,13 @@
 ###############################
 
 # Define location of local Philo4Classics directory
-philo4classics = "/home/waltms/Philo4Classics"
+philo4classics = "/path/to/Philo4Classics"
 
 # Default path to Greek Lexicon if different from philo4classics
-lexicon_db = "/var/www/cgi-bin/perseus/GreekLexicon.sqlite"
+lexicon_db = "/path/to/my/lexicon.sqlite"
 
 # Default abbrevs file
-abbrevs_file = "new_cts.abbrevs"
+abbrevs_file = "classics.abbrevs"
 
 # Define a Greek load to which Perseus URNs should point
 #Greek_load = "http://some.server.com/philologic4/TextLoad/"
@@ -45,6 +45,7 @@ doc_xpaths = {
 #        ".//sourceDesc/bibl/author[@type='marc100']",
 #        ".//sourceDesc/bibl/author[@type='artfl']",
 #        ".//sourceDesc/bibl/author",
+        ".//titlestmt/author",
         ".//titleStmt/author",
         ".//sourceDesc/biblStruct/monogr/author/name",
         ".//sourceDesc/biblFull/titleStmt/author",
@@ -59,6 +60,7 @@ doc_xpaths = {
 #        ".//sourceDesc/bibl/title[@type='marc245']",
 #        ".//sourceDesc/bibl/title[@type='artfl']",
 #        ".//sourceDesc/bibl/title",
+        ".//titlestmt/title",
         ".//titleStmt/title",
         ".//sourceDesc/bibl/titleStmt/title",
         ".//sourceDesc/biblStruct/monogr/title",
