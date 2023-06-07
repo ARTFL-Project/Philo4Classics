@@ -15,6 +15,8 @@ from philologic.runtime.DB import DB
 import sys
 sys.path.append("..")
 import custom_functions
+from custom_functions import isEnglish as isLatin
+
 try:
      from custom_functions import WebConfig
 except ImportError:
@@ -168,56 +170,21 @@ def lookup_word_service(environ, start_response):
         word_id = 0
 
     if request.report == "concordance" or request.report == "word_property_filter":
-        #print("Concordance", file=f)
-        #hits = db.query(request.selected, request["method"], request["arg"], **request.metadata)
-        #print("Hits: %s" % hits[0], file=f)
-        #print(request.selected, file=f)
-        #print(request.id, file=f)
-        #print("Metadata %s" % request.metadata, file=f)
-        #context_size = config['concordance_length'] * 3
-        #print("Concordance Length %s" % (context_size), file=f)
-        #print(request.position, file=f)
-        #hit = hits[int(request.position)]
-        #bytes = hit.bytes
-        #hit_span = hit.bytes[-1] - hit.bytes[0]
-        #length = context_size + hit_span + context_size
-        #print(length, file=f)
-        #bytes, start_byte = adjust_bytes(bytes, length)
-        #end_byte = start_byte + (length * 2)
-        #filename = hit.filename
         token = request.selected
-        #print(token, file=f)
     elif request.report == "kwic":
-#        hits = db.query(request["q"], request["method"], request["arg"], **request.metadata)
-#        context_size = config['concordance_length'] * 3
-#        hit = hits[int(request.position)]
-#        bytes = hit.bytes
-#        hit_span = hit.bytes[-1] - hit.bytes[0]
-#        length = context_size + hit_span + context_size
-#        bytes, start_byte = adjust_bytes(bytes, length)
-#        end_byte = start_byte + (length * 2)
         token = request.selected
     elif request.report == "navigation":
         token = request.selected
         philo_id = request.philo_id.split(" ")
-#        print("Philo_id %s" %(philo_id), file=f)
         text_obj = db[philo_id]
-        #print("Philo_id %s" %(text_obj), file=f)
         start_byte, end_byte = int(text_obj.start_byte), int(text_obj.end_byte)
         filename = text_obj.filename
-#        print >> sys.stderr, "WORD LOOKUP FROM NAVIGATION", request.philo_id,request.selected, start_byte, end_byte, filename
     else:
         pass
-#    print >> sys.stderr, "TOKEN", token, "BYTES: ", start_byte, end_byte, "FILENAME: ", filename, "POSITION", request.position
     token_n = 0
     if word_id:
-        #print("Have ID\n", file=f)
-        #f.close()
-        #yield lookup_word_by_id(db, cursor, token, token_n, filename, word_id).encode("utf8")
         yield lookup_word_by_id(db, cursor, token, token_n, word_id).encode("utf8")
     else:
-        #print("Don't Have ID\n", file=f)
-        #f.close()
         yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename).encode("utf8")
 
 def lookup_word_by_id(db, cursor, token, n, word_id):
@@ -236,14 +203,20 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
     lookup_word = token
     old_prob = 0
 
+    alt_field = ""
+    if isLatin(token):
+        alt_field = "alt_ls"
+    else:
+        alt_field = "alt_lsj"
+
     try:
         tokenid = word_id
         lex_connect = sqlite3.connect(db.locals.db_path + "/data/lexicon.db")
         lex_cursor = lex_connect.cursor()
         auth_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? and authority is not null;"
         parses_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? order by prob desc;"
-        Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.alt_lsj,shortdefs.def,Lexicon.lexid,note from Lexicon,shortdefs where Lexicon.lexid=? and shortdefs.lemma=Lexicon.lemma;"
-        all_Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.alt_lsj,shortdefs.def,Lexicon.lexid,note from lexicon,shortdefs where token in (select content from tokens where tokenid=?) and shortdefs.lemma=Lexicon.lemma;"
+        Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,shortdefs.def,Lexicon.lexid,note from Lexicon,shortdefs where Lexicon.lexid=? and shortdefs.lemma=Lexicon.lemma;" % alt_field
+        all_Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,shortdefs.def,Lexicon.lexid,note from lexicon,shortdefs where token in (select content from tokens where tokenid=?) and shortdefs.lemma=Lexicon.lemma;" % alt_field
 
         # first check if we have an authorized result
         auth_result = lex_cursor.execute(auth_query, (tokenid, )).fetchone()
