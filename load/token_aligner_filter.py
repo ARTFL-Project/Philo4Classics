@@ -41,8 +41,14 @@ def concat_milestones(loader,text):
             if "n" in record.attrib:
                 current_n["div1"] = record.attrib["n"]
                 #record.attrib["head"] = abbrev + record.attrib["n"]
-                record.attrib["head"] = record.attrib["n"]
-                #print >> sys.stderr, record.attrib["head"]
+                # special handling for dictionaries like Lewis & Short, where homonyms
+                # have separate entries with an 'n' attrib
+                if "id" in record.attrib:
+                    if record.attrib["n"] not in record.attrib["id"]:
+                        record.attrib["head"] = record.attrib["n"]
+                else:
+                    record.attrib["head"] = record.attrib["n"]
+                print(record.attrib["head"], file=sys.stderr)
             if "div2" in current_n: del current_n["div2"]
             if "div3" in current_n: del current_n["div3"]
         elif type == "div2":
@@ -51,7 +57,6 @@ def concat_milestones(loader,text):
                     current_n["div2"] = current_n["div1"] + "." + record.attrib["n"]
                     #record.attrib["head"] = abbrev + current_n["div2"]
                     record.attrib["head"] = current_n["div2"]
-                    #print >> sys.stderr, record.attrib["head"]
                 else:
                     record.attrib["head"] = record.attrib["n"]
             if "div3" in current_n: del current_n["div3"]
@@ -61,7 +66,6 @@ def concat_milestones(loader,text):
                     current_n["div3"] = current_n["div2"] + "." + record.attrib["n"]
                     #record.attrib["head"] = abbrev + current_n["div3"]
                     record.attrib["head"] = current_n["div3"]
-                    #print >> sys.stderr, record.attrib["head"]
                 else:
                     record.attrib["head"] = record.attrib["n"]
         print(record, file=tmp_file)
