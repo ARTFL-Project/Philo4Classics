@@ -3,13 +3,13 @@
 ###############################
 
 # Define location of local Philo4Classics directory
-philo4classics = "/path/to/Philo4Classics"
+philo4classics = "/home/waltms/Philo4Classics"
 
 # Default path to Greek Lexicon if different from philo4classics
-lexicon_db = "/path/to/my/lexicon.sqlite"
+lexicon_db = "/var/www/cgi-bin/perseus/GreekLexicon.sqlite"
 
 # Default abbrevs file
-abbrevs_file = "classics.abbrevs"
+abbrevs_file = "Latin.abbrevs"
 
 # Define a Greek load to which Perseus URNs should point
 #Greek_load = "http://some.server.com/philologic4/TextLoad/"
@@ -109,7 +109,10 @@ doc_xpaths = {
     "identifiers": [".//publicationStmt/idno"],
     "text_genre": [".//profileDesc/textClass/keywords[@scheme='genre']/term", ".//SourceDesc/genre"],
     "keywords": [".//profileDesc/textClass/keywords/list/item"],
-    "language": [".//profileDesc/language/language"],
+    "language": [
+        ".//profileDesc/language/language"
+        ".//profileDesc/langUsage/language"
+    ],
     "notes": [".//fileDesc/notesStmt/note", ".//publicationStmt/notesStmt/note"],
     "auth_gender": [".//publicationStmt/notesStmt/note"],
     "collection": [".//seriesStmt/title"],
@@ -305,10 +308,12 @@ with open (philo4classics + "/custom_functions/" + abbrevs_file) as f:
     abbrevs_content = f.readlines()
     for line in abbrevs_content:
         fields = line.split("\t")
-        filename = fields[2]
+        #filename = fields[2]
         urn = fields[-1].strip()
         abbrev = fields[0]
-        abbrevs_urns[filename] = [abbrev, urn]
+        for filename in range(2,4):
+            if fields[filename]:
+                abbrevs_urns[fields[filename]] = [abbrev, urn]
 
 try:
     import ClassicsPostFilters
