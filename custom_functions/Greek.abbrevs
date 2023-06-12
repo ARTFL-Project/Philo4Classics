@@ -231,12 +231,12 @@ HH 31	hymn-Line	HomericHymns31Gr.xml	HomericHymns31En.xml	urn:cts:greekLit:tlg00
 HH 32	hymn-Line	HomericHymns32Gr.xml	HomericHymns32En.xml	urn:cts:greekLit:tlg0013.tlg032
 HH 33	hymn-Line	HomericHymns33Gr.xml	HomericHymns33En.xml	urn:cts:greekLit:tlg0013.tlg033
 Hdt.	book-chapter-section	HerodotusHistoriesGr.xml	HerodotusHistoriesEn.xml	urn:cts:greekLit:tlg0016.tlg001
-Hyp. 1	speech	Hyperides1Gr.xml	HyperidesSpeeches1En.xml	urn:cts:greekLit:tlg0030.tlg001
-Hyp. 2	speech	Hyperides2Gr.xml	HyperidesSpeeches2En.xml	urn:cts:greekLit:tlg0030.tlg002
-Hyp. 3	speech	Hyperides3Gr.xml	HyperidesSpeeches3En.xml	urn:cts:greekLit:tlg0030.tlg003
-Hyp. 4	speech	Hyperides4Gr.xml	HyperidesSpeeches4En.xml	urn:cts:greekLit:tlg0030.tlg004
-Hyp. 5	speech	Hyperides5Gr.xml	HyperidesSpeeches5En.xml	urn:cts:greekLit:tlg0030.tlg005
-Hyp. 6	speech	Hyperides6Gr.xml	HyperidesSpeeches6En.xml	urn:cts:greekLit:tlg0030.tlg006
+Hyp. 1	speech	Hyperides1Gr.xml	Hyperides1En.xml	urn:cts:greekLit:tlg0030.tlg001
+Hyp. 2	speech	Hyperides2Gr.xml	Hyperides2En.xml	urn:cts:greekLit:tlg0030.tlg002
+Hyp. 3	speech	Hyperides3Gr.xml	Hyperides3En.xml	urn:cts:greekLit:tlg0030.tlg003
+Hyp. 4	speech	Hyperides4Gr.xml	Hyperides4En.xml	urn:cts:greekLit:tlg0030.tlg004
+Hyp. 5	speech	Hyperides5Gr.xml	Hyperides5En.xml	urn:cts:greekLit:tlg0030.tlg005
+Hyp. 6	speech	Hyperides6Gr.xml	Hyperides6En.xml	urn:cts:greekLit:tlg0030.tlg006
 Isae. 1	speech-section	Isaeus01Gr.xml	Isaeus01En.xml	urn:cts:greekLit:tlg0017.tlg001
 Isae. 2	speech-section	Isaeus02Gr.xml	Isaeus02En.xml	urn:cts:greekLit:tlg0017.tlg002
 Isae. 3	speech-section	Isaeus03Gr.xml	Isaeus03En.xml	urn:cts:greekLit:tlg0017.tlg003
@@ -397,6 +397,21 @@ Plut. Per.	chapter-section	PlutarchPericlesGr.xml	PlutarchPericlesEn.xml	urn:cts
 Plut. Sol.	chapter-section	PlutarchSolonGr.xml	PlutarchSolonEn.xml	urn:cts:greekLit:tlg0007.tlg007
 Plut. Them.	chapter-section	PlutarchThemistGr.xml	PlutarchThemistEn.xml	urn:cts:greekLit:tlg0007.tlg010
 Plut. Thes.	chapter-section	PlutarchTheseusGr.xml	PlutarchTheseusEn.xml	urn:cts:greekLit:tlg0007.tlg001
+Plut. Educ.	chapter-section	tlg0007.tlg067.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg067
+Plut. Aud.poet.	chapter-section	tlg0007.tlg068.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg068
+Plut. Aud.phil.	chapter-section	tlg0007.tlg069.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg069
+Plut. Adul.	chapter-section	tlg0007.tlg070.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg070
+Plut. Prof.	chapter-section	tlg0007.tlg071.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg071
+Plut. Inim.	chapter-section	tlg0007.tlg072.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg072
+Plut. Amic.	chapter-section	tlg0007.tlg073.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg073
+Plut. Fort.	chapter-section	tlg0007.tlg074.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg074
+Plut. Virt.	chapter-section	tlg0007.tlg075.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg075
+Plut. Cons.	chapter-section	tlg0007.tlg076.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg076
+Plut. San.	chapter-section	tlg0007.tlg077.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg077
+Plut. Coniug.	chapter-section	tlg0007.tlg078.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg078
+Plut. Sept.	chapter-section	tlg0007.tlg079.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg079
+Plut. Superst.	chapter-section	tlg0007.tlg080.perseus-grc2.xml		urn:cts:greekLit:tlg0007.tlg080
+Plut. Reg.	chapter-section	tlg0007.tlg081.perseus-grc4.xml		urn:cts:greekLit:tlg0007.tlg081
 Polyb.	book-chapter-section	PolybiusHistoriesGr.xml	PolybiusHistoriesEn.xml	urn:cts:greekLit:tlg0543.tlg001
 Soph. Aj.	card	SophoclesAjaxGr.xml	SophoclesAjaxEn.xml	urn:cts:greekLit:tlg0011.tlg003
 Soph. Ant.	card	SophoclesAntigoneGr.xml	SophoclesAntigoneEn.xml	urn:cts:greekLit:tlg0011.tlg002
@@ -406,7 +421,7 @@ Soph. OC	card	SophoclesOedipusColonusGr.xml	SophoclesOedipusColonusEn.xml	urn:ct
 Soph. OT	card	SophoclesOedipusTyrannusGr.xml	SophoclesOedipusTyrannusEn.xml	urn:cts:greekLit:tlg0011.tlg004
 Soph. Phil.	card	SophoclesPhiloctetesGr.xml	SophoclesPhiloctetesEn.xml	SophoclesPhiloctetesEn2.xml	urn:cts:greekLit:tlg0011.tlg006
 Soph. Trach.	card	SophoclesTrachiniaeGr.xml	SophoclesTrachiniaeEn.xml	SophoclesTrachiniaeEn2.xml	urn:cts:greekLit:tlg0011.tlg001
-Str.	book-chapter-section	StraboGeographyGr.xml	StraboGeographyEn.xml	StraboGeographyEn2.xml	urn:cts:greekLit:tlg0099.tlg001
+Str.	book-chapter-section	tlg0099.tlg001.perseus-grc2.xml	StraboGeographyEn.xml	StraboGeographyEn2.xml	urn:cts:greekLit:tlg0099.tlg001
 Theoc. Epigr.	poem-line	TheocritusEpigGr.xml	urn:cts:greekLit:tlg0005.tlg002
 Theoc. Id.	poem-line	TheocritusIdyllsGr.xml	TheocritusIdyllsEn.xml	urn:cts:greekLit:tlg0005.tlg001
 Theophr. Char.	chapter-section	TheophrastusCharactersGr.xml	urn:cts:greekLit:tlg0093.tlg009
@@ -497,3 +512,4 @@ Luc. DDeor.	section	tlg0062.tlg068.perseus-grc1.xml		urn:cts:greekLit:tlg0062.tl
 Luc. DMer.	section	tlg0062.tlg069.perseus-grc1.xml		urn:cts:greekLit:tlg0062.tlg069.perseus-grc1
 Luc. Soloec.	section	tlg0062.tlg070.perseus-grc1.xml		urn:cts:greekLit:tlg0062.tlg070.perseus-grc1
 Luc. Pod.	line	tlg0062.tlg071.perseus-grc1.xml		urn:cts:greekLit:tlg0062.tlg071.perseus-grc1
+Call. Alex.	book-chapter-section	CallAlexGr.xml		urn:cts:greekLit:tlg1386:tlg001
