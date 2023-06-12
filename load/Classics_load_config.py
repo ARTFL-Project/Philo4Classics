@@ -3,19 +3,21 @@
 ###############################
 
 # Define location of local Philo4Classics directory
-philo4classics = "/home/waltms/Philo4Classics"
+philo4classics = "/path/to/Philo4Classics"
 
-# Default path to Greek Lexicon if different from philo4classics
-lexicon_db = "/var/www/cgi-bin/perseus/GreekLexicon.sqlite"
+# Default path to Greek/Latin Lexicon if different from philo4classics
+lexicon_db = "/path/to/my/Lexicon.sqlite"
 
 # Default abbrevs file
 abbrevs_file = "Latin.abbrevs"
 
 # Define a Greek load to which Perseus URNs should point
+# (e.g. for loading dictionaries containing references)
 #Greek_load = "http://some.server.com/philologic4/TextLoad/"
 Greek_load = ""
 
 # Define a Latin load to which Perseus URNs should point
+# (e.g. for loading dictionaries containing references)
 #Latin_load = "http://some.server.com/philologic4/TextLoad/"
 Latin_load = ""
 
