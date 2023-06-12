@@ -295,26 +295,26 @@ for f in files2group:
 ###     make tokenid in words table INT       ###
 #################################################
 
-print("Is tokenid integer? ", end="")
-db = DB(myload_path + '/data/')
-cursor = db.dbh.cursor()
-query = "select * from sqlite_master where type='table';"
-cursor.execute(query)
-tokenid_int_exists = False
-for row in cursor.fetchall():
-    if "tokenid INT" in row["name"]:
-        tokenid_int_exists = True
-        print("yes!")
-        break
-
-if not tokenid_int_exists:
-    print("no!")
-    print("Redoing words_tokenid as INT in toms.db...", end="", flush=True)
-    #query = "alter table words add column tokenid2 INT;"
-    #cursor.execute(query)
-    query = "update words set 'tokenid' = cast(tokenid as INT);"
-    cursor.execute(query)
-    print("done!")
+#print("Is tokenid integer? ", end="")
+#db = DB(myload_path + '/data/')
+#cursor = db.dbh.cursor()
+#query = "select * from sqlite_master where type='table';"
+#cursor.execute(query)
+#tokenid_int_exists = False
+#for row in cursor.fetchall():
+#    if "tokenid INT" in row["name"]:
+#        tokenid_int_exists = True
+#        print("yes!")
+#        break
+#
+#if not tokenid_int_exists:
+#    print("no!")
+#    print("Redoing words_tokenid as INT in toms.db...", end="", flush=True)
+#    #query = "alter table words add column tokenid2 INT;"
+#    #cursor.execute(query)
+#    query = "update words set 'tokenid' = cast(tokenid as INT);"
+#    cursor.execute(query)
+#    print("done!")
 
 #################################################
 ###     index tokenid in words table          ###
@@ -690,6 +690,17 @@ show.progress()
 
 # fixes for dictionaries
 if (type_of_fix == "dictionary"):
+
+    f = regexmatch(r'(dbname.*?)\s?#', web_config, re.S)
+    if (f):
+        f = f.group(1)
+        new_f = ""
+        if '_dbname' not in f:
+            # add reference dbs
+            new_f = f + 'Greek_dbname = "%s"\nLatin_dbname = "%s"\n' % (Greek_load, Latin_load)
+            show.progress()
+            #swap in new conf
+            web_config = re.sub(re.escape(f), new_f, web_config, flags=re.S)
 
     #fix settings
     web_config = web_config.replace("dictionary = False", "dictionary = True")
@@ -1885,8 +1896,8 @@ if (f):
 \n                urn = perseus_to_cts_urn(el.attrib["n"])\
 \n                (urn, cite) = get_cite_from_urn(urn)\
 \n                if urn and cite:\
-\n                    if "greek" in urn: text_load = "' + Greek_load + '"\
-\n                    if "latin" in urn: text_load = "' + Latin_load + '"\
+\n                    if "greek" in urn: text_load = config.Greek_dbname\
+\n                    if "latin" in urn: text_load = config.Latin_dbname\
 \n                    el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%%22%s%%22\' % (urn, cite)\
 \n                    el.attrib["target"] = "_blank"'      
         new_f = re.sub(r'(\s*)(elif el.tag == "title":)', r'\1#fix_load was here\1' + content + r'\1\2', new_f, flags=re.S)
@@ -1914,8 +1925,8 @@ if (f):
 \n                    urn = perseus_to_cts_urn(el.attrib["n"])\
 \n                    (urn, cite) = get_cite_from_urn(urn)\
 \n                    if urn and cite:\
-\n                        if "greek" in urn: text_load = "' + Greek_load + '"\
-\n                        if "latin" in urn: text_load = "' + Latin_load + '"\
+\n                        if "greek" in urn: text_load = config.Greek_dbname\
+\n                        if "latin" in urn: text_load = config.Latin_dbname\
 \n                        el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%%22%s%%22\' % (urn, cite)\
 \n                        el.attrib["target"] = "_blank"'      
         new_f = re.sub(r'(\s*)(elif el.tag == "head":)', r'\1#fix_load was here\1' + content + r'\1\2', f, flags=re.S)
