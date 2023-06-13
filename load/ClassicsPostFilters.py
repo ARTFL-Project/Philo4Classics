@@ -127,7 +127,11 @@ def metadata_frequencies(loader_obj):
             for result in cursor:
                 if result[0] is not None:
                     val = result[0]
-                    clean_val = val.replace("\n", " ").replace("\t", "")
+                    clean_val = ""
+                    try:
+                        clean_val = val.replace("\n", " ").replace("\t", "")
+                    except AttributeError as e:
+                        clean_val = str(val).replace("\n", " ").replace("\t", "")
                     print(clean_val + "\t" + str(result[1]), file=output)
             output.close()
         except sqlite3.OperationalError:
