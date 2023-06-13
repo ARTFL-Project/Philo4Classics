@@ -59,7 +59,11 @@ def generate_toc_object(request, config):
                 if text["book"] != "":
                     book = text["book"]
                 if display_name:
-                    display_name = display_name.strip()
+                    # handle special situation of non-string display_name
+                    try:
+                        display_name = display_name.strip()
+                    except AttributeError as e:
+                        display_name = str(display_name).strip()
                 if not display_name or (display_name == text['type'] and display_name != "notes") or display_name[0] == "0" or ":" in display_name:
                     if book and text['n'] and text["philo_type"] == "div2" and (text['n'].isnumeric() or countNumeric > 1):
                         if text['n'].isnumeric(): countNumeric += 1
