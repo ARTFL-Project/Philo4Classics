@@ -251,7 +251,10 @@ seg_attrib = re.compile(r"<seg \w+=", re.I)
 abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)', re.I | re.M)
 semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
 h_tag = re.compile(r"<h(\d)>", re.I)
+
 is_drama = re.compile(r"<term>.*?drama.*?</term>", re.I)
+div_act_tag = re.compile(r"<div.*act", re.I)
+div_scene_tag = re.compile(r"<div.*scene", re.I)
 
 # CTS and refsDecl stuff (WMS)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
@@ -537,6 +540,10 @@ class XMLParser:
         self.current_div_level = 0
         self.in_seg = False
         self.urn = ""
+        self.using_lines = False
+        self.using_scenes = False
+        self.using_acts = False
+        self.current_line_n = 0
 
         # CTS and refsDecl stuff (WMS)
         self.in_refsDecl = False
@@ -928,6 +935,34 @@ class XMLParser:
                 self.v.pull("sent", self.bytes_read_in)
                 self.in_tagged_sentence = False
                 self.open_sent = False
+          
+            # ACT-SCENE-LINE structure without cards
+            elif div_act_tag.search(tag):
+                self.using_acts = True
+            elif div_scene_tag.search(tag):
+                self.using_scenes = True
+            elif line_tag.search(tag) and self.is_drama:
+                if self.open_div3:  # account for unclosed line tags
+                    div3_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div3(div3_end_byte)
+                self.v.push("div3", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div3")
+                # get or construct line number
+                if n_attribute.search(tag):
+                    #print("Line number: %s" % n_attribute.search(tag).group(1))
+                    try:
+                        self.current_line_n = int(n_attribute.search(tag).group(1))
+                    except ValueError as e:
+                        # we may have a line range (I'm looking at you Plautus editors)
+                        line_range = n_attribute.search(tag).group(1).split('-')
+                        self.current_line_n = int(line_range[1])
+                else:
+                    self.current_line_n += 1
+                self.open_div3 = True
+                self.v["div3"]["head"] = str(self.current_line_n)
+            elif closed_line_tag.search(tag) and self.is_drama:
+                div3_end_byte = self.bytes_read_in - len(tag)
+                self.close_div3(div3_end_byte)
 
             # MILESTONE TAG: <milestone.*/> Treat self-closing <milestone>
             # tags like unclosed paragraph tags but labeled as
@@ -1087,7 +1122,7 @@ class XMLParser:
             # - I output <head> info where I find it.  This could also be modified to output
             #   a structured table record with div type, and other attributes, along with
             #   the Philoid and head for searching under document levels.
-            elif (closed_div_tag.search(tag) and not self.is_drama):
+            elif (closed_div_tag.search(tag) and (not self.is_drama or (self.using_acts and not self.using_cards))):
                 if "div1" in tag_name:
                     if self.in_front_matter:
                         self.close_div2(self.bytes_read_in)
@@ -1102,7 +1137,7 @@ class XMLParser:
                     self.close_div3(self.bytes_read_in)
                 self.context_div_level -= 1
                 self.no_deeper_objects = False
-            elif (div_tag.search(tag) and not self.is_drama and not div_edition_tag.search(tag)):
+            elif (div_tag.search(tag) and (not self.is_drama or (self.using_acts and not self.using_cards)) and not div_edition_tag.search(tag)):
                 # if we have refStates, then use those to determine level, otherwise increment arbitrarily
                 self.found_cts_level = False
                 if div_tag_cts.search(tag):
@@ -1141,13 +1176,17 @@ class XMLParser:
                 #print("Div level %s %s" % (self.context_div_level, tag_name), end=", ")
                 div_type = "div%d" % div_level
                 #print("Div type %s" % (div_type))
-                if div_type == "div1" and not self.is_drama:
+                #if div_type == "div1" and not self.is_drama:
+                if div_type == "div1":
                     if self.open_div1:
                         self.close_div1(start_byte)
                     self.open_div1 = True
                     self.v.push("div1", tag_name, start_byte)
                     self.current_div_id = self.v["div1"].id
-                    self.v["div1"]["head"] = self.get_div_head(tag)
+                    if self.using_acts:
+                        self.v["div1"]["head"] = "Act " + self.get_div_head(tag)
+                    else:
+                        self.v["div1"]["head"] = self.get_div_head(tag)
                     m = book_attribute.search(tag)
                     if m:
                         self.v["div"]["book"] = m.group(1)
