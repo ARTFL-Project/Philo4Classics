@@ -72,6 +72,10 @@ def generate_text_object(request, config, note=False):
             text = re.sub(r"%s" % pattern, "%s" % replacement, text)
     text_object["text"] = text
     text_object["imgs"] = imgs
+    try:
+        text_object["translation"] = "%squery?report=bibliography&method=proxy&cts_urn=%s&head=%s" % (config.translation_dbname, metadata_fields["cts_urn"], metadata_fields["head"])
+    except:
+        text_object["translation"] = ""
     return text_object
 
 def neighboring_object_id(db, philo_id, width):

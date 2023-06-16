@@ -14,6 +14,7 @@ from Classics_load_config import lexicon_db
 from Classics_load_config import abbrevs_file
 from Classics_load_config import Greek_load
 from Classics_load_config import Latin_load
+from Classics_load_config import translation_load
 
 # Important Settings #
 
@@ -250,6 +251,7 @@ if type_of_fix == "dictionary" and not Greek_load and not Latin_load:
 # Add missing final slashes
 if Greek_load and not Greek_load.endswith('/'): Greek_load += "/"
 if Latin_load and not Latin_load.endswith('/'): Latin_load += "/"
+if translation_load and not translation_load.endswith('/'): translation_load += "/"
 
 #################################################
 ###          Paths of Files to Edit           ###
@@ -691,6 +693,7 @@ show.progress()
 # fixes for dictionaries
 if (type_of_fix == "dictionary"):
 
+    # add reference dbnames
     f = regexmatch(r'(dbname.*?)\s?#', web_config, re.S)
     if (f):
         f = f.group(1)
@@ -757,6 +760,18 @@ if (type_of_fix == "text"):
         show.progress()
     except:
         show.progress()
+
+    # Add a translation dbname
+    f = regexmatch(r'(dbname.*?)\s?#', web_config, re.S)
+    if (f):
+        f = f.group(1)
+        new_f = ""
+        if '_dbname' not in f:
+            # add db
+            new_f = f + 'translation_dbname = "%s"' % (translation_load)
+            show.progress()
+            #swap in new conf
+            web_config = re.sub(re.escape(f), new_f, web_config, flags=re.S)
 
     # don't display title in kwic bib 
     f = re.search(r'kwic_bibliography_fields = \[.*?\]', web_config, flags=re.S)
@@ -1712,6 +1727,11 @@ print("navigationBar.html", end="")
 # Have the nav bar actually show where you are
 # 'whereami' is defined in the textObject function in philoLogic.js
 navigationBar_html = re.sub('Table of contents', '{{ textObject.metadata_fields.whereami }}', navigationBar_html)
+show.progress()
+
+# Add a button to go to translation load; translation is defined in navigation.py
+button = '<a class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>Translation</span></a>'
+navigationBar_html = re.sub('</button>\s*</div>', '</button>\n%s\n</div>' % button, navigationBar_html, flags=re.S)
 show.progress()
 
 close_for_mod(navigationBar_html_path, navigationBar_html)
