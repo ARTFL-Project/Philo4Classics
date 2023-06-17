@@ -180,6 +180,7 @@ doc_body_tag = re.compile(r"<docbody", re.I)
 body_tag = re.compile(r"<body\W", re.I)
 div_tag = re.compile(r"<div", re.I)
 div_edition_tag = re.compile(r"<div.*edition", re.I)
+div_translation_tag = re.compile(r"<div.*translation", re.I)
 div1_tag = re.compile(r'<div1', re.I)
 div2_tag = re.compile(r'<div2', re.I)
 closed_div_tag = re.compile(r"<\/div", re.I)
@@ -192,6 +193,8 @@ milestone_tag = re.compile(r'<milestone', re.I)
 milestone_chapter_tag = re.compile(r'<milestone.*=\"(chapter|page)', re.I)
 milestone_section_tag = re.compile(r'<milestone.*\"section', re.I)
 milestone_card_tag = re.compile(r'<milestone.*card', re.I)
+milestone_act_tag = re.compile(r'<milestone.*act', re.I)
+milestone_scene_tag = re.compile(r'<milestone.*scene', re.I)
 milestone_poem_tag = re.compile(r'<milestone.*poem', re.I)
 milestone_bekker_tag = re.compile(r'<milestone.*bekker page', re.I)
 milestone_Bekker_tag = re.compile(r'<milestone.*Bekker', re.I)
@@ -253,6 +256,8 @@ semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
 h_tag = re.compile(r"<h(\d)>", re.I)
 is_drama = re.compile(r"<term>.*?drama.*?</term>", re.I)
 line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
+milestone_line_tag = re.compile(r'<milestone.*line', re.I)
+div_card_tag = re.compile(r'<div.*card', re.I)
 
 # CTS and refsDecl stuff (WMS)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
@@ -953,6 +958,22 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div2")
                     self.open_div2 = True
                     self.using_cards = True
+            elif milestone_act_tag.search(tag):
+                if self.open_div1:  # account for unclosed milestone tags
+                    div1_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div1(div1_end_byte)
+                self.v.push("div1", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div1")
+                self.v["div1"]["type"] = "act"
+                self.open_div1 = True
+            elif milestone_scene_tag.search(tag):
+                if self.open_div2:  # account for unclosed milestone tags
+                    div2_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div2(div2_end_byte)
+                self.v.push("div2", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div2")
+                self.v["div2"]["type"] = "scene"
+                self.open_div2 = True
 #            elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_card_tag.search(tag) or milestone_chapter_tag.search(tag):
             #elif milestone_Bekker_tag.search(tag) or milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
             elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
@@ -1001,7 +1022,16 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div1")
                     self.open_div1 = True
                     self.open_section = True
-
+            elif milestone_line_tag.search(tag) or div_card_tag.search(tag):
+                if self.open_div3:  # account for unclosed milestone tags
+                    div3_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div3(div3_end_byte)
+                self.v.push("div3", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div3")
+                self.v["div3"]["type"] = "line"
+                self.open_div3 = True
+                self.using_cards = True
+                
             # TODO: handle docbody
 
             # FRONT: Treat <front as a <div
@@ -1099,7 +1129,7 @@ class XMLParser:
             # - I output <head> info where I find it.  This could also be modified to output
             #   a structured table record with div type, and other attributes, along with
             #   the Philoid and head for searching under document levels.
-            elif (closed_div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards))):
+            elif (closed_div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_card_tag.search(tag)):
             #elif (closed_div_tag.search(tag) and not self.is_drama):
                 if "div1" in tag_name:
                     if self.in_front_matter:
@@ -1116,7 +1146,7 @@ class XMLParser:
                 self.context_div_level -= 1
                 self.no_deeper_objects = False
             #elif (div_tag.search(tag) and not self.is_drama and not div_edition_tag.search(tag)):
-            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag)):
+            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag)):
                 # if we have refStates, then use those to determine level, otherwise increment arbitrarily
                 self.found_cts_level = False
                 if div_tag_cts.search(tag):
@@ -1192,18 +1222,18 @@ class XMLParser:
                     if self.v[div_type]["type"] == "notes":
                         self.no_deeper_objects = True
 
-            elif div_edition_tag.search(tag): 
+            elif div_edition_tag.search(tag) or div_translation_tag.search(tag): 
                 # if we found an edition div, then push the CTS edition urn in doc level
-                if (div_edition_tag.search(tag)):
-                    urn = ""
-                    m = re.search('n="(.*?)"', tag)
-                    if m:
-                        urn = m.group(1)
-                        #print("CTS URN found: %s" % urn)
-                    self.v["doc"]["cts_edition"] = urn
-                    if "cts_urn" not in self.v["doc"]:
-                        # turn edition urn to regular urn
-                        self.v["doc"]["cts_urn"] = re.sub(r'(urn:cts:\w+:\w+\.\w+).[\w-]+:*([0-9\.]+)*', r'\1', urn)
+                #if (div_edition_tag.search(tag)):
+                urn = ""
+                m = re.search('n="(.*?)"', tag)
+                if m:
+                    urn = m.group(1)
+                    #print("CTS URN found: %s" % urn)
+                self.v["doc"]["cts_edition"] = urn
+                if "cts_urn" not in self.v["doc"]:
+                    # turn edition urn to regular urn
+                    self.v["doc"]["cts_urn"] = re.sub(r'(urn:cts:\w+:\w+\.\w+).[\w-]+:*([0-9\.]+)*', r'\1', urn)
 
                 # We are handling the case of index tags containing attributes which describe the parent div
                 # the type attrib has its value in the value attrib
