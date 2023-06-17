@@ -154,7 +154,8 @@ def request_GetPassage(cts_config, config, request):
         hits = db.query(sort_order="", **metadata)
 
         # if we got no results from a poetic text, we may need to decrement down to a labeled line number
-        if len(hits) == 0 and have_poetry:
+        #if len(hits) == 0 and have_poetry:
+        if len(hits) == 0:
             decrement_count = 0
             decrement_max = 50
             while len(hits) == 0:

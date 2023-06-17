@@ -49,7 +49,8 @@ def bibliography_results(request, config):
         hits = db.query(sort_order=request["sort_order"], **request.metadata)
    
         # if we got no results from a poetic text, we may need to decrement down to a labeled line number
-        if len(hits) == 0 and have_poetry and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+        #if len(hits) == 0 and have_poetry and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+        if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
             while len(hits) == 0:
                 decrement_count += 1
                 request.metadata["head"] = decrement_level(request.metadata["head"])
