@@ -62,7 +62,10 @@ def concat_milestones(loader,text):
             if "div3" in current_n: del current_n["div3"]
         elif type == "div3":
             if "n" in record.attrib:
-                if "div2" in current_n.keys():
+                isLine = False
+                if "type" in record.attrib:
+                    if record.attrib["type"] == "line": isLine = True
+                if "div2" in current_n.keys() and not isLine:
                     current_n["div3"] = current_n["div2"] + "." + record.attrib["n"]
                     #record.attrib["head"] = abbrev + current_n["div3"]
                     record.attrib["head"] = current_n["div3"]
