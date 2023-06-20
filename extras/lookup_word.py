@@ -15,7 +15,7 @@ from philologic.runtime.DB import DB
 import sys
 sys.path.append("..")
 import custom_functions
-from custom_functions import isEnglish as isLatin
+from custom_functions import isGreek
 
 try:
      from custom_functions import WebConfig
@@ -204,10 +204,10 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
     old_prob = 0
 
     alt_field = ""
-    if isLatin(token):
-        alt_field = "alt_ls"
-    else:
+    if isGreek(token):
         alt_field = "alt_lsj"
+    else:
+        alt_field = "alt_ls"
 
     try:
         tokenid = word_id
@@ -247,12 +247,14 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
             Lexicon_result = lex_cursor.execute(Lexicon_query, (lexid, )).fetchone()
             if prob_result[0] is None:
                 best_parse = (prob_result[2], prob_result[1])
-            else:
+            elif Lexicon_result:
                 lookup_word = best_parse[0]
                 best_parse = (Lexicon_result[0], Lexicon_result[1])
                 best_defn = Lexicon_result[3]
                 best_alt_lsj = Lexicon_result[2]
                 best_note = Lexicon_result[5]
+            else:
+                best_defn = "Unknown"
             lookup_word = best_parse[0]
 
         # now get all of the other possible parse results
