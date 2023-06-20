@@ -5,7 +5,7 @@ def bib_citation_format (filename):
     import os, sys, csv
 
     dirname = os.path.dirname(__file__)
-    abbrevs_file = "GreekSummer2021.abbrevs"
+    abbrevs_file = "Latin.abbrevs"
     abbrevs = ""
     if os.path.exists(os.path.join(dirname, abbrevs_file)):
         abbrevs = os.path.join(dirname, abbrevs_file)
@@ -42,6 +42,12 @@ def isEnglish(s):
         return False
     else:
         return True
+
+def isGreek(s):
+    maxchar = max(s)
+    if '\u0370' <= maxchar <= u'\u1fff':
+        return True
+    return False
 
 def expand_codes ( code ):
     expanded = ""
