@@ -552,6 +552,14 @@ except:
     init += "from .customRuntime import isEnglish\n"
     show.progress()
 
+#insert isGreek  init
+f = re.search(r'isGreek', init, flags=re.S)
+try:
+    f = f.group()
+except:
+    init += "from .customRuntime import isGreek\n"
+    show.progress()
+
 #insert ObjectFormatter init
 f = re.search(r'format_concordance', init, flags=re.S)
 try:
