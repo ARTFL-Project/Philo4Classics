@@ -260,7 +260,10 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
 
         # now get the shortdef
         shortdefs_result = lex_cursor.execute(shortdefs_query, (best_parse[0], )).fetchone()
-        best_defn = shortdefs_result[1]
+        if shortdefs_result:
+            best_defn = shortdefs_result[1]
+        else:
+            best_defn = ""
 
         # now get all of the other possible parse results
         Lexicon_result = lex_cursor.execute(all_Lexicon_query, (tokenid, )).fetchall()
@@ -274,7 +277,10 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
 
             # now get the shortdef
             shortdefs_result = lex_cursor.execute(shortdefs_query, (parse[0], )).fetchone()
-            defn = shortdefs_result[1]
+            if shortdefs_result:
+                best_defn = shortdefs_result[1]
+            else:
+                best_defn = ""
 
             # if the current result is not a best_parse, then include it
             if parse != best_parse:
@@ -291,6 +297,7 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
     # check if 'user' cookie is set to determine whether to construct the morph_url
     cookies = os.environ['HTTP_COOKIE']
     cookies = cookies.split(';')
+    #print(cookies, file=sys.stderr)
     morph_url = ""
     if any("user" in var for var in cookies):
         morph_url = "https://anastrophe.uchicago.edu/cgi-bin/perseus/morph.pl?id=%s&&lang=%s" % (tokenid, morph_lang)
