@@ -3,7 +3,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-		<h4 style="display: inline;" class="modal-title" id="wordObjectDetail">Parsing <b>{{wordProperties.token}}</b></h4> <h5 style="display: inline;">(word {{wordProperties.tokenid}})</h5>
+                <div ng-if="wordProperties.morph_url">
+			<h4 style="display: inline;" class="modal-title" id="wordObjectDetail">Parsing <b>{{wordProperties.token}}</b></h4> <h5 style="display: inline;">(word <a href="{{wordProperties.morph_url}}" target="_blank">{{wordProperties.tokenid}}</a>)</h5>
+                </div>
+                <div ng-if="!wordProperties.morph_url">
+			<h4 style="display: inline;" class="modal-title" id="wordObjectDetail">Parsing <b>{{wordProperties.token}}</b></h4> <h5 style="display: inline;">(word {{wordProperties.tokenid}})</h5>
+                </div>
             </div>
 			<a href="{{ wordProperties.problem_report }}" class="btn btn-default btn-xs pull-right" role="button" style="border-width: 0px 0px 1px 1px !important; margin-right: 2px;color: inherit; position: absolute; z-index: 100;right: 0;">
 				 Report a problem
