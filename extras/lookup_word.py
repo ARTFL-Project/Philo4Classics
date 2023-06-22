@@ -182,10 +182,7 @@ def lookup_word_service(environ, start_response):
     else:
         pass
     token_n = 0
-    if word_id:
-        yield lookup_word_by_id(db, cursor, token, token_n, word_id).encode("utf8")
-    else:
-        yield lookup_word(db, cursor, token, token_n, start_byte, end_byte, filename).encode("utf8")
+    yield lookup_word_by_id(db, cursor, token, token_n, word_id).encode("utf8")
 
 def lookup_word_by_id(db, cursor, token, n, word_id):
     best_parse = ("","")
@@ -202,12 +199,15 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
     best_alt_lsj = ""
     lookup_word = token
     old_prob = 0
+    morph_lang = ""
 
     alt_field = ""
     if isGreek(token):
         alt_field = "alt_lsj"
+        morph_lang = "greek"
     else:
         alt_field = "alt_ls"
+        morph_lang = "latin"
 
     try:
         tokenid = word_id
@@ -215,8 +215,9 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
         lex_cursor = lex_connect.cursor()
         auth_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? and authority is not null;"
         parses_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? order by prob desc;"
-        Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,shortdefs.def,Lexicon.lexid,note from Lexicon,shortdefs where Lexicon.lexid=? and shortdefs.lemma=Lexicon.lemma;" % alt_field
-        all_Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,shortdefs.def,Lexicon.lexid,note from lexicon,shortdefs where token in (select content from tokens where tokenid=?) and shortdefs.lemma=Lexicon.lemma;" % alt_field
+        shortdefs_query = "select lemma,def from shortdefs where lemma=?"
+        Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,Lexicon.lexid,note from Lexicon where Lexicon.lexid=?;" % alt_field
+        all_Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,Lexicon.lexid,note from lexicon where token in (select content from tokens where tokenid=?);" % alt_field
 
         # first check if we have an authorized result
         auth_result = lex_cursor.execute(auth_query, (tokenid, )).fetchone()
@@ -234,7 +235,7 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
                  best_parse = (Lexicon_result[0], Lexicon_result[1])
                  best_defn = Lexicon_result[3]
                  best_alt_lsj = Lexicon_result[2]
-                 best_note = Lexicon_result[5]
+                 best_note = Lexicon_result[4]
 
             if best_parse[0] == "segment": lookup_word = get_next_segment(lex_cursor, tokenid)
             else: lookup_word = best_parse[0]
@@ -250,12 +251,16 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
             elif Lexicon_result:
                 lookup_word = best_parse[0]
                 best_parse = (Lexicon_result[0], Lexicon_result[1])
-                best_defn = Lexicon_result[3]
+#                best_defn = Lexicon_result[3]
                 best_alt_lsj = Lexicon_result[2]
-                best_note = Lexicon_result[5]
+                best_note = Lexicon_result[4]
             else:
                 best_defn = "Unknown"
             lookup_word = best_parse[0]
+
+        # now get the shortdef
+        shortdefs_result = lex_cursor.execute(shortdefs_query, (best_parse[0], )).fetchone()
+        best_defn = shortdefs_result[1]
 
         # now get all of the other possible parse results
         Lexicon_result = lex_cursor.execute(all_Lexicon_query, (tokenid, )).fetchall()
@@ -265,8 +270,11 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
             parse = (L_lemma, L_pos)
 
             alt_lsj = Lexicon_row[2]
-            defn = Lexicon_row[3]
-            note = Lexicon_row[5]
+            note = Lexicon_row[4]
+
+            # now get the shortdef
+            shortdefs_result = lex_cursor.execute(shortdefs_query, (parse[0], )).fetchone()
+            defn = shortdefs_result[1]
 
             # if the current result is not a best_parse, then include it
             if parse != best_parse:
@@ -279,6 +287,13 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
 
     except Exception as e:
         print(str(e) + " on line " + str(e.__traceback__.tb_lineno), file=sys.stderr)
+
+    # check if 'user' cookie is set to determine whether to construct the morph_url
+    cookies = os.environ['HTTP_COOKIE']
+    cookies = cookies.split(';')
+    morph_url = ""
+    if any("user" in var for var in cookies):
+        morph_url = "https://anastrophe.uchicago.edu/cgi-bin/perseus/morph.pl?id=%s&&lang=%s" % (tokenid, morph_lang)
 
     result_object = {
         'properties': [{"property": "Definition",
@@ -295,6 +310,7 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
         'problem_report': 'https://docs.google.com/forms/d/1lyhb35OB9JLuMwy8-PK6gOFn6EnO9c9W52WoICLkuac/viewform?formkey=clpPVXBDZkJ6bDlTLVZOZThybFBNbGc6MA',
         'token': token,
         'tokenid': tokenid,
+        'morph_url': morph_url,
         #'lemma': row['lemma'],
         'lemma': best_parse[0],
         'blesslemma': u"\u2713" if blesslemma else "",
@@ -303,147 +319,14 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
         'philo_id': "FIX THIS",
         'alt_lemma': [],
         "dictionary_name": 'Logeion',
-        "dictionary_lookup": "http://logeion.uchicago.edu/" + lookup_word,
+        "dictionary_lookup": "https://logeion.uchicago.edu/" + token,
         "alt_parses": [{
             "lemma": l,
             "parse": all_parses[l],
-            "dictionary_lookup": "http://logeion.uchicago.edu/" + ''.join([i for i in l if not str(i).isdigit()])
+            "dictionary_lookup": "https://logeion.uchicago.edu/" + ''.join([i for i in l if not str(i).isdigit()])
         } for l, p in all_parses.items()]  #,
     }
     return json.dumps(result_object)
-
-def lookup_word(db, cursor, token, n, start, end, filename):
-    #print("Hello!", file=f)
-    #f = open("/tmp/test.log", "a")
-    i = 0
-    query = "select * from words where (start_byte >= ?) and (end_byte <= ?) and (filename = ?);"
-    print("%s %s %s" % ("QUERY", query, (start,end,filename)), file=f)
-    cursor.execute(query, (start, end, filename))
-    #token_lower = token.decode("utf-8").lower().encode("utf-8")
-    token_lower = token.lower()
-    for row in cursor.fetchall():
-        #print (row, file=f)
-        #print("%s %s" % (row['philo_name'], type(row['philo_name'])), file=f)
-        #print(token, file=f)
-        #if row['philo_name'] == token_lower:
-        # don't check against lowercase, ridiculous!
-        if row['philo_name'] == token:
-            #print(row['philo_name'], file=f)
-            #print(row["tokenid"], file=f)
-
-            best_parse = (row["lemma"], row["pos"])
-            #print("Best Parse: %s", best_parse, file=f)
-            all_parses = {}
-            authority = ""
-            blesslex = ""
-            blesslemma = ""
-            best_prob = ""
-            defn = ""
-            best_defn = ""
-            alt_lsj = ""
-            best_alt_lsj = ""
-            try:
-                tokenid = row["tokenid"]
-                #print(db.locals.db_path, file=f)
-                lex_connect = sqlite3.connect(db.locals.db_path + "/data/lexicon.db")
-                lex_cursor = lex_connect.cursor()
-                prob_cursor = lex_connect.cursor()
-                auth_query = "select authority from parses where authority is not null and tokenid = ?;"
-                auth_result = lex_cursor.execute(auth_query, (tokenid, )).fetchone()
-                if auth_result:
-                    authority = auth_result[0]
-                #print("Authority: %s" % authority, file=f)
-
-                lex_query = "select Lexicon.lemma,Lexicon.code,Lexicon.alt_lsj,shortdefs.def,Lexicon.lexid from lexicon,shortdefs where token in (select content from tokens where tokenid=?) and shortdefs.lemma=Lexicon.lemma;"
-                #lex_query = "select Lexicon.lemma,Lexicon.code,Lexicon.alt_lsj,shortdefs.def from lexicon,shortdefs where token in (select content from tokens where tokenid=?) and shortdefs.lemma=Lexicon.lemma;"
-                #                lex_query = "select Lexicon.lemma,Lexicon.code,authority,shortdefs.def from parses,Lexicon,shortdefs where parses.tokenid = ? and parses.lex=Lexicon.lexid and shortdefs.lemma=Lexicon.lemma;"
-                #print ("LEX QUERY %s %s %s" % (lex_query, tokenid, token), file=f)
-                lex_cursor.execute(lex_query, (tokenid, ))
-
-                raw_parses = []
-                for parse_row in lex_cursor.fetchall():
-
-                    #print("Parse row: %s %s %s %s" % (parse_row[0], parse_row[1], parse_row[2], parse_row[3]), file=f)
-
-                    prob = ""
-                    prob_query = "select lex,prob from parses where tokenid=? order by prob desc;" 
-                    prob_cursor.execute(prob_query, (tokenid, ))
-                    for prob_row in prob_cursor.fetchall():
-                        if prob_row[0] == parse_row[4]:
-                            prob = prob_row[1]
-                            #print("%s|%s" % (prob_row[0], prob), file=f)
-                            continue
-
-                    p_lemma, p_pos = parse_row[0], parse_row[1]
-                    parse = (p_lemma, p_pos)
-#                    if not defn and parse_row[2]:
-                    if parse_row[3]:
-                        defn = parse_row[3]
-                        #print("%s %s" % ("DEFINITION:", parse_row[3]), file=f);
-                    else:
-                        defn = ""
-                    if parse_row[2]:
-                        alt_lsj = parse_row[2]
-                        #print("ALT LSJ: %s" % alt_lsj, file=f)
-                    else:
-                        #print("NO ALT LSJ", file=f)
-                        alt_lsj = ""
-
-                    #print("Compare parses. Best: %s, Current: %s" % (best_parse, parse), file=f)
-                    if parse != best_parse:
-                        raw_parses.append(parse)
-                        #print("ALT LSJ? (%s)" % alt_lsj, file=f)
-                        if p_lemma not in all_parses:
-                            expanded_pos = expand_codes(p_pos)
-                            #expanded_pos = "%s %s" % (expand_codes(p_pos), prob if prob else "0")
-                            if p_lemma == best_parse[0]: defn = ""
-                            all_parses[p_lemma] = [(expanded_pos, defn, alt_lsj)]
-                        else:
-                            expanded_pos = expand_codes(p_pos)
-                            #expanded_pos = "%s %s" % (expand_codes(p_pos), prob if prob else "0")
-                            if p_lemma == best_parse[0]: defn = ""
-                            all_parses[p_lemma].append((expanded_pos, "", alt_lsj))
-                    else:
-                        best_defn = defn
-                        best_alt_lsj = alt_lsj
-                        best_prob = prob
-                        pass
-
-            except:
-                pass
-            if i == int(n):
-                lookup_word = row['lemma']
-                if lookup_word == "<unknown>":
-                    lookup_word = token
-                result_object = {
-                    'properties': [{"property": "Definition",
-                                    "value": best_defn},
-                                   {"property": "Parse",
-                                    "value": ("%s") % (expand_codes(row['pos']))},
-                                    #"value": ("%s %s") % (expand_codes(row['pos']), u"\u2713" if authority else "")},
-                                    #"value": ("%s %s %s") % (expand_codes(row['pos']), u"\u2713" if authority else "", best_prob if best_prob else "")},
-                                   {"property": "Alt_lsj",
-                                    "value": best_alt_lsj}
-                    ],
-                    'problem_report': 'https://docs.google.com/forms/d/1lyhb35OB9JLuMwy8-PK6gOFn6EnO9c9W52WoICLkuac/viewform?formkey=clpPVXBDZkJ6bDlTLVZOZThybFBNbGc6MA',
-                    'token': token,
-                    'tokenid': tokenid,
-                    'lemma': row['lemma'],
-                    'blesslemma': u"\u2713" if blesslemma else "",
-                    'authority': u"\u2713" if authority else "",
-                    'philo_id': row['philo_id'],
-                    "dictionary_name": 'Logeion',
-                    "dictionary_lookup": "http://logeion.uchicago.edu/" + lookup_word,
-                    "alt_parses": [{
-                        "lemma": l,
-                        "parse": all_parses[l],
-                        "dictionary_lookup": "http://logeion.uchicago.edu/" + ''.join([i for i in l if not str(i).isdigit()])
-                    } for l, p in all_parses.items()]  #,
-                }
-                return json.dumps(result_object)
-            else:
-                i += 1
-    return json.dumps({})
 
 if __name__ == "__main__":
     if len(sys.argv) > 6:
