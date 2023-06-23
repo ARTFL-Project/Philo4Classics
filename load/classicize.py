@@ -1264,7 +1264,7 @@ f = f.group()
 if 'bold' not in f:
     new_f = re.sub(r'( *)xml-milestone::before', r'\1xml-milestone:not([unit="Reitzpage"])::before', f, flags=re.S)
     show.progress()
-    new_f = re.sub(r'( *)content.*?;', r'\1content: attr(n) "  ";\n\1white-space: pre;', new_f, flags=re.S)
+    new_f = re.sub(r'( *)content.*?;', r'\1content: attr(n);\n\1white-space: pre;', new_f, flags=re.S)
     show.progress()
     new_f = re.sub(r'( *)color.*?;', r'\1color: #000000;\n\1font-weight: bold;', new_f, flags=re.S)
     show.progress()
@@ -1411,7 +1411,7 @@ f = regexmatch(r'xml-l\[n\]::before \{.*?\}', philoLogic_css, re.S)
 if (f):
     f = f.group()
     if 'bold' not in f:
-        new_f = re.sub(r'( *)color.*?;', r'\1color: #909090;\n\1font-weight: bold;\n\1text-indent: -1em;', f, flags=re.S)
+        new_f = re.sub(r'( *)color.*?;', r'\1color: #909090;\n\1font-weight: bold;\n\1text-indent: -0.5em;', f, flags=re.S)
         show.progress()
         #swap in new css
         philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
@@ -1423,7 +1423,7 @@ if (f):
     f = f.group()
     if 'who' not in f:
         # change content and add more formatting
-        new_f = re.sub(r'( *)content.*;', r'\1content: attr(who);\n\1display: block;\n\1font-weight: 700;\n\1padding-top: 10px;', f, flags=re.S)
+        new_f = re.sub(r'( *)content.*;', r'\1content: attr(who);\n\1display: block;\n\1font-weight: 700;\n\1padding-top: 10px;\n\1font-size: 1.1em;', f, flags=re.S)
         show.progress()
         content = "\n.xml-sp[rend=\"none\"]::before {\
 \n    content: \'\';\
@@ -1465,6 +1465,17 @@ if (f):
         new_f += content
         show.progress()
 
+        content = "\ndiv[subtype=\"card\"]::before {\
+\n    content: attr(n) "   ";\
+\n    white-space: pre;\
+\n    color: #000000;\
+\n    font-weight: bold;\
+\n    font-family: 'LinLibertinePhilo41', sans-serif;\
+\n    font-size: 0.8em;\
+\n}"
+        new_f += content
+        show.progress()
+
         if type_of_fix == "dictionary":
             content = "\ndiv[class='philologic-fragment'] {\
 \n    font-family: 'LinLibertinePhilo41', sans-serif;\
@@ -1484,6 +1495,28 @@ if (f):
             new_f += content
             show.progress()
 
+        #swap in new css
+        philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
+
+#grab text-content-area
+f = regexmatch(r'\.text-content-area \{.*?\}', philoLogic_css, re.S)
+if (f):
+    f = f.group()
+    if 'Libertine' not in f:
+        # change to Libertine font
+        new_f = re.sub(r'( *)(font-family.*)}', r"\1/*\2\1font-family: 'LinLibertinePhilo41', sans-serif;\n}", f, flags=re.S)
+        show.progress()
+        #swap in new css
+        philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
+
+#grab xml-speaker
+f = regexmatch(r'\.xml-speaker \{.*?display.*?\}', philoLogic_css, re.S)
+if (f):
+    f = f.group()
+    if 'bold' not in f:
+        # make bold and increase size slightly
+        new_f = re.sub(r'( *)(display.*;)', r'\1\2\n\1font-weight: bold;\n\1font-size: 1.1em;', f, flags=re.S)
+        show.progress()
         #swap in new css
         philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
 
