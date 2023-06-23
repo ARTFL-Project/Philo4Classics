@@ -72,7 +72,7 @@ def get_label(hit, citation_object):
                 div1_name = get_div1_name(hit)
                 #div2_name = hit.div2.n.strip()
                 div2_name = get_div2_name(hit)
-                div3_name = hit.div3.n.strip()
+                div3_name = hit.div3.n.strip() or hit.div3.head
 
                 # if the head of the section combines the book number and section,
                 # and the book number was already grabbed in the div1, then
