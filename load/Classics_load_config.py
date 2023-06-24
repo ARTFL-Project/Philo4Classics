@@ -5,8 +5,8 @@
 # Define location of local Philo4Classics directory
 philo4classics = "/path/to/Philo4Classics"
 
-# Default path to Greek/Latin Lexicon if different from philo4classics
-lexicon_db = "/path/to/my/Lexicon.sqlite"
+# Default path to Greek Lexicon if different from philo4classics
+lexicon_db = "/path/to/my/lexicon.sqlite"
 
 # Default abbrevs file
 abbrevs_file = "Latin.abbrevs"
@@ -21,6 +21,7 @@ Latin_load = ""
 
 # Define a translation load (for text loads)
 translation_load = ""
+translation_lang = ""
 
 # Define default object level
 default_object_level = "doc"
