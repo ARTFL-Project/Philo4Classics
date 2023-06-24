@@ -1771,7 +1771,7 @@ navigationBar_html = re.sub('Table of contents', '{{ textObject.metadata_fields.
 show.progress()
 
 # Add a button to go to translation load; translation is defined in navigation.py
-button = '<a class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>Translation</span></a>'
+button = '<a ng-if="philoConfig.translation_dbname != ''" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>Translation</span></a>'
 navigationBar_html = re.sub('</button>\s*</div>', '</button>\n%s\n</div>' % button, navigationBar_html, flags=re.S)
 show.progress()
 
