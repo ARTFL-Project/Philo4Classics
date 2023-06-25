@@ -326,7 +326,7 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
         'philo_id': "FIX THIS",
         'alt_lemma': [],
         "dictionary_name": 'Logeion',
-        "dictionary_lookup": "https://logeion.uchicago.edu/" + token,
+        "dictionary_lookup": "https://logeion.uchicago.edu/" + (best_parse[0] if best_parse[0] != '<unknown>' else token),
         "alt_parses": [{
             "lemma": l,
             "parse": all_parses[l],
