@@ -3,7 +3,7 @@
 import sys
 import re
 import os
-from subprocess import call
+import subprocess as sp
 from shutil import copyfile
 import glob
 import philologic
@@ -86,9 +86,9 @@ class visual_progress():
 show = visual_progress('...')
 
 def own_file(file_path):
-    call('cp ' + file_path + ' ~/my_temp_file', shell=True)
-    call('rm -f ' + file_path, shell=True)
-    call('mv ~/my_temp_file ' + file_path, shell=True)
+    sp.call('cp ' + file_path + ' ~/my_temp_file', shell=True)
+    sp.call('rm -f ' + file_path, shell=True)
+    sp.call('mv ~/my_temp_file ' + file_path, shell=True)
     return
 
 def open_for_mod(file_path, rw):
@@ -96,7 +96,9 @@ def open_for_mod(file_path, rw):
         f = open(file_path, rw)
     except FileNotFoundError:
         print(file_path + " does not exist.")
-        sys.exit()
+        if ".js" in file_path:
+            print("You forgot to open the load in the browser before running classicize.py.")
+            sys.exit()
     except PermissionError:
         print ("...owning!", end="")
         own_file(file_path)
@@ -152,7 +154,11 @@ def smartcopy(orig, dest, force=False):
                 print("...%s is latest." % orig_file)
     if need_copy:
         print("...%s" % orig_file)
-        copyfile(orig, dest)
+        try:
+            copyfile(orig, dest)
+        except Exception as e:
+            print("Insufficient permissions. You will need to run classicize.py with sudo.")
+            sys.exit()
         
 ### End of Functions ###
 
@@ -195,7 +201,7 @@ if (type_of_fix == "cts"):
     smartcopy("../cts/cts.cfg", myload_path + "/data/cts.cfg")
     show.progress()
     smartcopy("../cts/cts.py", myload_path + "/cts.py")
-    call("chmod go+x " + myload_path + "/cts.py", shell=True)
+    sp.call("chmod go+x " + myload_path + "/cts.py", shell=True)
     show.progress()
     print(" (done)")
 
@@ -292,7 +298,10 @@ for f in files2own:
 
 for f in files2group:
     print("Grouping: %s!" % (f))
-    call("chmod g+w " + myload_path + "/" + f, shell=True)
+    result = sp.run(["chmod", "g+w", myload_path + "/" + f], stderr=sp.PIPE)
+    if "not permitted" in str(result.stderr):
+        print("Insufficient permissions. You will need to run classicize.py with sudo.")
+        sys.exit()
 
 #################################################
 ###     make tokenid in words table INT       ###
@@ -339,8 +348,11 @@ if not tokenid_index_exists:
     print("no!")
     print("Building words_tokenid_index in toms.db...", end="", flush=True)
     query = "create index words_tokenid_index on words (tokenid);"
-    cursor.execute(query)
-    print("done!")
+    try:
+        cursor.execute(query)
+        print("done!")
+    except:
+        print("No tokenid column. Skip.")
 
 #################################################
 ###      Copy over Custom Functions           ###
