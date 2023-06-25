@@ -790,7 +790,7 @@ if (type_of_fix == "text"):
         if '_dbname' not in f:
             # add db
             new_f = f + 'translation_dbname = "%s"' % (translation_load)
-            new_f = f + 'translation_lang = "%s"\n' % (translation_lang)
+            new_f = new_f + '\ntranslation_lang = "%s"\n' % (translation_lang)
             show.progress()
             #swap in new conf
             web_config = re.sub(re.escape(f), new_f, web_config, flags=re.S)
@@ -1785,7 +1785,7 @@ navigationBar_html = re.sub('Table of contents', '{{ textObject.metadata_fields.
 show.progress()
 
 # Add a button to go to translation load; translation is defined in navigation.py
-button = '<a ng-if="philoConfig.translation_dbname != ''" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>{{philoConfig.translation_lang}}</span></a>'
+button = '<a ng-if="philoConfig.translation_dbname != \'\'" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>{{philoConfig.translation_lang}}</span></a>'
 navigationBar_html = re.sub('</button>\s*</div>', '</button>\n%s\n</div>' % button, navigationBar_html, flags=re.S)
 show.progress()
 
