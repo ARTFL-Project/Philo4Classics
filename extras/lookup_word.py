@@ -278,9 +278,9 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
             # now get the shortdef
             shortdefs_result = lex_cursor.execute(shortdefs_query, (parse[0], )).fetchone()
             if shortdefs_result:
-                best_defn = shortdefs_result[1]
+                defn = shortdefs_result[1]
             else:
-                best_defn = ""
+                defn = ""
 
             # if the current result is not a best_parse, then include it
             if parse != best_parse:
