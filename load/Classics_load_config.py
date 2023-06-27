@@ -3,10 +3,10 @@
 ###############################
 
 # Define location of local Philo4Classics directory
-philo4classics = "/path/to/Philo4Classics"
+philo4classics = "/home/waltms/Philo4Classics"
 
 # Default path to Greek Lexicon if different from philo4classics
-lexicon_db = "/path/to/my/lexicon.sqlite"
+lexicon_db = "/var/www/cgi-bin/perseus/LatinLexicon.sqlite"
 
 # Default abbrevs file
 abbrevs_file = "Latin.abbrevs"
@@ -20,8 +20,8 @@ Greek_load = ""
 Latin_load = ""
 
 # Define a translation load (for text loads)
-translation_load = ""
-translation_lang = ""
+translation_load = "https://anastrophe.uchicago.edu/philologic4/Ovidtr"
+translation_lang = "English"
 
 # Define default object level
 default_object_level = "doc"
@@ -323,12 +323,14 @@ try:
     import ClassicsPostFilters
     import ClassicsLoadFilters
     import ClassicsParser
+    #from philologic.loadtime import Parser    
 except ModuleNotFoundError as err:
     print("One or more philo4classics modules seem to be missing: %s." % err)
     print("Please verify that all three are present in %s/ ." % philo4classics)
     sys.exit()
 
 parser_factory = ClassicsParser.XMLParser
+#parser_factory = Parser.XMLParser
 parser_factory.abbrevs_urns = abbrevs_urns
 post_filters = ClassicsPostFilters.PerseusPostFilters
 load_filters = ClassicsLoadFilters.set_load_filters(lexicon_db=lexicon_db)
