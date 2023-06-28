@@ -48,7 +48,7 @@ def concat_milestones(loader,text):
                         record.attrib["head"] = record.attrib["n"]
                 else:
                     record.attrib["head"] = record.attrib["n"]
-                print(record.attrib["head"], file=sys.stderr)
+                #print(record.attrib["head"], file=sys.stderr)
             if "div2" in current_n: del current_n["div2"]
             if "div3" in current_n: del current_n["div3"]
         elif type == "div2":

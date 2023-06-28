@@ -622,7 +622,6 @@ class XMLParser:
             else:
                 self.word_handler(line)
                 self.bytes_read_in += len(line.encode("utf8"))
-
         # if we have an open page, make sure we close it so it is properly stored
         if self.open_page:
             self.v.pull("page", self.bytes_read_in)
@@ -1761,7 +1760,7 @@ class XMLParser:
 
 if __name__ == "__main__":
     for docid, fn in enumerate(sys.argv[1:], 1):
-        print(docid, fn, file=sys.stderr)
+        #print(docid, fn, file=sys.stderr)
         size = os.path.getsize(fn)
         fh = open(fn)
         parser = XMLParser(
