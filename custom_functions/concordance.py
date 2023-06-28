@@ -17,7 +17,7 @@ def concordance_results(request, config):
     """Fetch concordances results."""
     db = DB(config.db_path + "/data/")
 
-    have_poetry = False
+    #have_poetry = False
     abbrev = ""
     decrement_count = 0
     decrement_max = 50
@@ -33,14 +33,9 @@ def concordance_results(request, config):
             if m:
                 request.metadata["head"] = m.group(1)
 
-            # first do the search with quotes around the head, and if that garners no results, then do it quoteless
-            request_metadata_quoted = request.metadata.copy()
-            request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
-            hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request_metadata_quoted)
-            if len(hits) == 0:
-                hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
-        else:
-            hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
+            # first do the search with quotes around the head
+            request.metadata['head'] = '"%s"' % request.metadata['head']
+        hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
 
         # If no results, and 'head' is in the metadata, then first query just the text to see whether it is poetry
         if len(hits) == 0 and "head" in request.metadata and "cts_urn" in request.metadata:
@@ -84,6 +79,11 @@ def concordance_results(request, config):
                 if len(hits) == 0:
                     metadata_copy["head"] = abbrev_head
                     hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **metadata_copy)
+            
+            # if we still have no hits and we have a 'head', then search without quotes
+            if "head" in request.metadata and len(hits) == 0:
+                request.metadata['head'] = request.metadata['head'].strip('"')
+                hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
 
     start, end, page_num = page_interval(request["results_per_page"], hits, request.start, request.end)
 

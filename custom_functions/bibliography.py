@@ -17,7 +17,7 @@ def bibliography_results(request, config):
     """Fetch bibliography results"""
     db = DB(config.db_path + "/data/")
 
-    have_poetry = False 
+    #have_poetry = False 
     abbrev = ""
     decrement_count = 0
     decrement_max = 50
@@ -32,14 +32,9 @@ def bibliography_results(request, config):
             if m:
                 request.metadata["head"] = m.group(1)
 
-	    # first do the search with quotes around the head, and if that garners no results, then do it quoteless
-            request_metadata_quoted = request.metadata.copy()
-            request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
-            hits = db.query(sort_order=request["sort_order"], **request_metadata_quoted)
-       	    if len(hits) == 0:
-                hits = db.query(sort_order=request["sort_order"], **request.metadata)
-        else:
-            hits = db.query(sort_order=request["sort_order"], **request.metadata)
+	    # first do the search with quotes around the head
+            request.metadata['head'] = '"%s"' % request.metadata['head']
+        hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
         ## If 'head' is in the metadata, then first query just the text to see whether it is poetry
         ## and also grab the abbreviation
@@ -87,6 +82,11 @@ def bibliography_results(request, config):
                 if len(hits) == 0 and abbrev_head:
                     metadata_copy["head"] = abbrev_head
                     hits = db.query(sort_order=request["sort_order"], **metadata_copy)
+
+        # finally, if we still have no results and we have a head, then search it unquoted
+       	if "head" in request.metadata and len(hits) == 0:
+            request.metadata['head'] = request.metadata['head'].strip('"')
+            hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
     if (
         request.simple_bibliography == "all"
