@@ -3,10 +3,10 @@
 ###############################
 
 # Define location of local Philo4Classics directory
-philo4classics = "/home/waltms/Philo4Classics"
+philo4classics = "/path/to/Philo4Classics"
 
 # Default path to Greek Lexicon if different from philo4classics
-lexicon_db = "/var/www/cgi-bin/perseus/LatinLexicon.sqlite"
+lexicon_db = "/path/to/my/Lexicon.sqlite"
 
 # Default abbrevs file
 abbrevs_file = "Latin.abbrevs"
@@ -20,7 +20,7 @@ Greek_load = ""
 Latin_load = ""
 
 # Define a translation load (for text loads)
-translation_load = "https://anastrophe.uchicago.edu/philologic4/Ovidtr"
+translation_load = ""
 translation_lang = "English"
 
 # Define default object level
