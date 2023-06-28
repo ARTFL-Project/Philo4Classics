@@ -25,35 +25,36 @@ def bibliography_results(request, config):
     if request.no_metadata:
         hits = db.get_all(db.locals["default_object_level"], request["sort_order"])
     else:
-        # If we have a Bekker or Stephanus page, then strip off the quotation marks.
-        # This regex will also match Bekker pages with line numbers, and group 1
-        # will exclude them.
+
         if "head" in request.metadata:
-            m = re.match(r'^"([0-9]+[a-e]+)[\.0-9]*"$', request.metadata["head"], re.I)
+            # This regex will strip line numbers from Bekker pages, and group 1 will exclude them.
+            m = re.match(r'^([0-9]+[a-e]+)[\.0-9]*$', request.metadata["head"], re.I)
             if m:
                 request.metadata["head"] = m.group(1)
 
-        # If 'head' is in the metadata, then first query just the text to see whether it is poetry
-        # and also grab the abbreviation
-        if "head" in request.metadata:
-            metadata_nohead = request.metadata.copy()
-            del metadata_nohead['head']
-            hits = db.query(sort_order=request["sort_order"], **metadata_nohead)
-            for hit in hits:
-                if "poetry" in hit["text_genre"]:
-                    have_poetry = True
-                else:
-                    have_poetry = False
-                if hit["abbrev"]: abbrev = hit["abbrev"]
-
-	# first do the search with quotes around the head, and if that garners no results, then do it quoteless
-        request_metadata_quoted = request.metadata.copy()
-        request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
-        hits = db.query(sort_order=request["sort_order"], **request_metadata_quoted)
-        if len(hits) == 0:
+	    # first do the search with quotes around the head, and if that garners no results, then do it quoteless
+            request_metadata_quoted = request.metadata.copy()
+            request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
+            hits = db.query(sort_order=request["sort_order"], **request_metadata_quoted)
+       	    if len(hits) == 0:
+                hits = db.query(sort_order=request["sort_order"], **request.metadata)
+        else:
             hits = db.query(sort_order=request["sort_order"], **request.metadata)
+
+        ## If 'head' is in the metadata, then first query just the text to see whether it is poetry
+        ## and also grab the abbreviation
+        #if "head" in request.metadata:
+        #    metadata_nohead = request.metadata.copy()
+        #    del metadata_nohead['head']
+        #    hits = db.query(sort_order=request["sort_order"], **metadata_nohead)
+        #    for hit in hits:
+        #        if "poetry" in hit["text_genre"]:
+        #            have_poetry = True
+        #        else:
+        #            have_poetry = False
+        #        if hit["abbrev"]: abbrev = hit["abbrev"]
    
-        # if we got no results from a poetic text, we may need to decrement down to a labeled line number
+        ## if we got no results from a poetic text, we may need to decrement down to a labeled line number
         #if len(hits) == 0 and have_poetry and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
         if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
             while len(hits) == 0:

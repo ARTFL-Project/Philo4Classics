@@ -27,20 +27,20 @@ def concordance_results(request, config):
         second_hits = db.query(request["left"], request["method"], request["arg"], **request.metadata)
         hits = CombinedHitlist(first_hits, second_hits)
     else:
-        # If we have a Bekker or Stephanus page, then strip off the quotation marks.
-        # This regex will also match Bekker pages with line numbers, and group 1
-        # will exclude them.
+        # This regex will strip line numbers from  Bekker pages; group 1 will exclude them.
         if "head" in request.metadata:
-            m = re.match(r'^"([0-9]+[a-e]+)[\.0-9]*"$', request.metadata["head"], re.I)
+            m = re.match(r'^([0-9]+[a-e]+)[\.0-9]*$', request.metadata["head"], re.I)
             if m:
                 request.metadata["head"] = m.group(1)
 
-        # first do the search with quotes around the head, and if that garners no results, then do it quoteless
-        request_metadata_quoted = request.metadata.copy()
-        request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
-        hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request_metadata_quoted)
-        if len(hits) == 0:
-             hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
+            # first do the search with quotes around the head, and if that garners no results, then do it quoteless
+            request_metadata_quoted = request.metadata.copy()
+            request_metadata_quoted['head'] = '"%s"' % request_metadata_quoted['head']
+            hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request_metadata_quoted)
+            if len(hits) == 0:
+                hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
+        else:
+            hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
 
         # If no results, and 'head' is in the metadata, then first query just the text to see whether it is poetry
         if len(hits) == 0 and "head" in request.metadata and "cts_urn" in request.metadata:
