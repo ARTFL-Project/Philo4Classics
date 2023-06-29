@@ -255,6 +255,7 @@ abbrev_expand = re.compile(r'(<abbr .*expan=")([^"]*)("[^>]*>)([^>]*)(</abbr>)',
 semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
 h_tag = re.compile(r"<h(\d)>", re.I)
 is_drama = re.compile(r"<term>.*?drama.*?</term>", re.I)
+is_poetry = re.compile(r"<term>.*?poetry.*?</term>", re.I)
 line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
 milestone_line_tag = re.compile(r'<milestone.*line', re.I)
 div_card_tag = re.compile(r'<div.*card', re.I)
@@ -529,12 +530,14 @@ class XMLParser:
         self.using_cards = False
         self.got_a_div2 = False
         self.is_drama = False
+        self.is_poetry = False
         self.got_a_milestone = False
         self.open_para = False
         self.open_sent = False
         self.open_page = False
         self.in_tagged_sentence = False
         self.got_a_div = False
+        self.got_a_div1 = False
         self.got_a_para = False
         self.context_div_level = 0
         self.current_tag = "doc"
@@ -555,8 +558,12 @@ class XMLParser:
         self.content = text_input.read()
         if is_drama.search(self.content):
             self.is_drama = True
+        if is_poetry.search(self.content):
+            self.is_poetry = True
         if div_tag.search(self.content):
             self.got_a_div = True
+        if div1_tag.search(self.content):
+            self.got_a_div1 = True
         if div2_tag.search(self.content):
             self.got_a_div2 = True
         if milestone_tag.search(self.content):
@@ -934,17 +941,6 @@ class XMLParser:
                 self.in_tagged_sentence = False
                 self.open_sent = False
 
-             ## ACT-SCENE-LINE structure without cards
-            elif line_n_tag.search(tag) and self.is_drama:
-                if self.open_div3:  # account for unclosed line tags
-                    div3_end_byte = self.bytes_read_in - len(tag)
-                    self.close_div3(div3_end_byte)
-                self.v.push("div3", tag_name, start_byte)
-                self.get_object_attributes(tag, tag_name, "div3")
-                #print("Line number: %s" % n_attribute.search(tag).group(1))
-                self.open_div3 = True
-                self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
-
             # MILESTONE TAG: <milestone.*/> Treat self-closing <milestone>
             # tags like unclosed paragraph tags but labeled as
             # either div1 or div2 so that they show up in the table
@@ -955,6 +951,7 @@ class XMLParser:
                         self.close_div2(div2_end_byte)
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
+                    self.v["div2"]["type"] = "card"
                     self.open_div2 = True
                     self.using_cards = True
             elif milestone_act_tag.search(tag):
@@ -1021,15 +1018,35 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div1")
                     self.open_div1 = True
                     self.open_section = True
-            elif milestone_line_tag.search(tag) or div_card_tag.search(tag):
+            elif milestone_line_tag.search(tag) and self.got_a_div1:
+                if self.open_div2:  # account for unclosed milestone tags
+                    div2_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div2(div2_end_byte)
+                self.v.push("div2", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div2")
+                self.v["div2"]["type"] = "card"
+                self.open_div2 = True
+                self.using_cards = True
+            elif div_card_tag.search(tag):
                 if self.open_div3:  # account for unclosed milestone tags
                     div3_end_byte = self.bytes_read_in - len(tag)
                     self.close_div3(div3_end_byte)
                 self.v.push("div3", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "div3")
-                self.v["div3"]["type"] = "line"
+                self.v["div3"]["type"] = "card"
                 self.open_div3 = True
                 self.using_cards = True
+
+             ## ACT-SCENE-LINE structure without cards
+            elif line_n_tag.search(tag) and (self.is_drama or self.is_poetry):
+                if self.open_div3:  # account for unclosed line tags
+                    div3_end_byte = self.bytes_read_in - len(tag)
+                    self.close_div3(div3_end_byte)
+                self.v.push("div3", tag_name, start_byte)
+                self.get_object_attributes(tag, tag_name, "div3")
+                #print("Line number: %s" % n_attribute.search(tag).group(1))
+                self.open_div3 = True
+                self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
                 
             # TODO: handle docbody
 

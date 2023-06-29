@@ -87,7 +87,6 @@ def fix_card_milestones(loader, text):
         if "type" in record.attrib and record.attrib["type"] == "card":
             if last_card:
                 last_card.attrib["head"] = last_card.attrib["head"] + " - " + record.attrib["head"]
-#                print >> sys.stderr, last_card
                 print(last_card, file=temp_file)
             last_card = record
         else:
