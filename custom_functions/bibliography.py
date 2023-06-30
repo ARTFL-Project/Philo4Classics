@@ -36,33 +36,40 @@ def bibliography_results(request, config):
             request.metadata['head'] = '"%s"' % request.metadata['head']
         hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
-        ## If 'head' is in the metadata, then first query just the text to see whether it is poetry
-        ## and also grab the abbreviation
-        #if "head" in request.metadata:
-        #    metadata_nohead = request.metadata.copy()
-        #    del metadata_nohead['head']
-        #    hits = db.query(sort_order=request["sort_order"], **metadata_nohead)
-        #    for hit in hits:
-        #        if "poetry" in hit["text_genre"]:
-        #            have_poetry = True
-        #        else:
-        #            have_poetry = False
-        #        if hit["abbrev"]: abbrev = hit["abbrev"]
-   
-        ## if we got no results from a poetic text, we may need to decrement down to a labeled line number
-        #if len(hits) == 0 and have_poetry and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
-        if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
-            while len(hits) == 0:
-                decrement_count += 1
-                request.metadata["head"] = decrement_level(request.metadata["head"])
-                hits = db.query(sort_order=request["sort_order"], **request.metadata)
-                # don't do this forever
-                if (decrement_count >= decrement_max):
-                    break
-            decrement_count = 0
-
-        # If we get no results, check to see if we have a higher level saved in the head
         if "head" in request.metadata:
+
+            # if no results, check to see if we have a range and and search for only the beginning
+            if len(hits) == 0 and "-" in request.metadata["head"]:
+                request.metadata["head"] = re.sub(r' *-.*$', '"', request.metadata["head"])
+                print(request.metadata["head"], file=sys.stderr)
+                hits = db.query(sort_order=request["sort_order"], **request.metadata)
+
+            ## If 'head' is in the metadata, then first query just the text to see whether it is poetry
+            ## and also grab the abbreviation
+            #if "head" in request.metadata:
+            #    metadata_nohead = request.metadata.copy()
+            #    del metadata_nohead['head']
+            #    hits = db.query(sort_order=request["sort_order"], **metadata_nohead)
+            #    for hit in hits:
+            #        if "poetry" in hit["text_genre"]:
+            #            have_poetry = True
+            #        else:
+            #            have_poetry = False
+            #        if hit["abbrev"]: abbrev = hit["abbrev"]
+   
+            ## if we got no results from a poetic text, we may need to decrement down to a labeled line number
+            #if len(hits) == 0 and have_poetry and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+            if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+                while len(hits) == 0:
+                    decrement_count += 1
+                    request.metadata["head"] = decrement_level(request.metadata["head"])
+                    hits = db.query(sort_order=request["sort_order"], **request.metadata)
+                    # don't do this forever
+                    if (decrement_count >= decrement_max):
+                        break
+                decrement_count = 0
+
+            # If we get no results, check to see if we have a higher level saved in the head
             if len(hits) == 0 and "." in request.metadata["head"] and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
                 metadata_copy = request.metadata.copy()
                 while len(hits) == 0:
@@ -83,10 +90,10 @@ def bibliography_results(request, config):
                     metadata_copy["head"] = abbrev_head
                     hits = db.query(sort_order=request["sort_order"], **metadata_copy)
 
-        # finally, if we still have no results and we have a head, then search it unquoted
-       	if "head" in request.metadata and len(hits) == 0:
-            request.metadata['head'] = request.metadata['head'].strip('"')
-            hits = db.query(sort_order=request["sort_order"], **request.metadata)
+            # finally, if we still have no results then search it unquoted
+       	    if len(hits) == 0:
+                request.metadata['head'] = request.metadata['head'].strip('"')
+                hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
     if (
         request.simple_bibliography == "all"

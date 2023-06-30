@@ -3,6 +3,7 @@
 
 
 from philologic.runtime.link import make_absolute_object_link, make_absolute_query_link
+import sys
 
 
 def citation_links(db, config, i):
@@ -70,14 +71,16 @@ def get_label(hit, citation_object):
                     label = ""
             else:
                 div1_name = get_div1_name(hit)
-                #div2_name = hit.div2.n.strip()
                 div2_name = get_div2_name(hit)
-                div3_name = hit.div3.n.strip() or hit.div3.head
+                div3_name = ""
+                if hit.div3.philo_type != hit.div2.philo_type:
+                    div3_name = hit.div3.n.strip() or hit.div3.head
 
                 # if the head of the section combines the book number and section,
                 # and the book number was already grabbed in the div1, then
-                # have div2_name only show the section number in the citation
-                if div1_name + "." in div2_name:
+                # have div2_name only show the section number in the citation,
+                # but make sure that we are not dealing with a range
+                if div1_name + "." in div2_name and "-" not in div2_name:
                     div2_name = div2_name.split('.')[-1]
 
 #                div3_name = ""
