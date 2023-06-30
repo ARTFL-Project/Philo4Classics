@@ -981,6 +981,10 @@ class XMLParser:
                         self.close_div2(div2_end_byte)
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
+                    if milestone_poem_tag.search(tag):
+                        self.v["div2"]["type"] = "poem"
+                    else:
+                        self.v["div2"]["type"] = "chapter"
                     self.open_div2 = True
                     self.open_chapter = True
                 elif self.open_section and not self.got_a_div:
@@ -990,6 +994,10 @@ class XMLParser:
                         self.close_div1(div1_end_byte)
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
+                    if milestone_poem_tag.search(tag):
+                        self.v["div1"]["type"] = "poem"
+                    else:
+                        self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
                     self.open_chapter = True
             elif milestone_section_tag.search(tag) and not self.got_a_div2:
@@ -1000,6 +1008,7 @@ class XMLParser:
                         self.close_div3(div3_end_byte)
                     self.v.push("div3", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div3")
+                    self.v["div3"]["type"] = "section"
                     self.open_div3 = True
                     self.open_section = True
                 elif not self.open_chapter and self.got_a_div:
@@ -1008,6 +1017,7 @@ class XMLParser:
                         self.close_div2(div2_end_byte)
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
+                    self.v["div2"]["type"] = "section"
                     self.open_div2 = True
                     self.open_section = True
                 elif not self.open_chapter and not self.got_a_div:
@@ -1016,6 +1026,7 @@ class XMLParser:
                         self.close_div1(div1_end_byte)
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
+                    self.v["div1"]["type"] = "section"
                     self.open_div1 = True
                     self.open_section = True
             elif milestone_line_tag.search(tag) and self.got_a_div1:
@@ -1044,6 +1055,7 @@ class XMLParser:
                     self.close_div3(div3_end_byte)
                 self.v.push("div3", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "div3")
+                self.v["div3"]["type"] = "line"
                 #print("Line number: %s" % n_attribute.search(tag).group(1))
                 self.open_div3 = True
                 self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
