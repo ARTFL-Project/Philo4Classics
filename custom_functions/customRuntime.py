@@ -49,6 +49,13 @@ def isGreek(s):
         return True
     return False
 
+def get_cts_divs (hit):
+    divs = []
+    divs.append(hit.doc.cts_div1)
+    divs.append(hit.doc.cts_div2)
+    divs.append(hit.doc.cts_div3)
+    return divs
+
 def expand_codes ( code ):
     expanded = ""
     map0 = {
