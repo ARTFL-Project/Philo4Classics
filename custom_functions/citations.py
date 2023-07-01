@@ -3,6 +3,7 @@
 
 
 from philologic.runtime.link import make_absolute_object_link, make_absolute_query_link
+from .customRuntime import get_cts_divs
 import sys
 
 
@@ -57,13 +58,25 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
             citation.append(cite)
     return citation
 
-
 def get_label(hit, citation_object):
     """Get metadata labels"""
     label = ""
     if citation_object["object_level"] == "doc":
         label = hit[citation_object["field"]].strip() or hit["abbrev"]
-    if citation_object["object_level"].startswith("div"):
+    
+    # for divs, make sure that the current level's type is one listed in the refdecl, which are saved in cts_divs in the doc level
+    valid_type = False
+    obj_type = getattr(hit, citation_object["object_level"]).type.lower()
+    #print(citation_object["object_level"], file=sys.stderr)
+    #print(obj_type, file=sys.stderr)
+    #print(get_cts_divs(hit), file=sys.stderr)
+    print("Div3 type: " + hit.div3.philo_type, file=sys.stderr)
+    print("Div3 head: " + hit.div3.head, file=sys.stderr)
+    # first check if we're dealing with a special case for cards
+    if obj_type in get_cts_divs(hit) or hit.div3.philo_type != "div3" or hit.div3.head == "":
+        valid_type = True
+
+    if citation_object["object_level"].startswith("div") and valid_type:
         if citation_object["field"] == "head":
             if citation_object["object_level"] == "div1":
                 label = get_div1_name(hit)
