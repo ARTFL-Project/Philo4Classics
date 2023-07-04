@@ -195,7 +195,7 @@ milestone_section_tag = re.compile(r'<milestone.*\"section', re.I)
 milestone_card_tag = re.compile(r'<milestone.*card', re.I)
 milestone_act_tag = re.compile(r'<milestone.*act', re.I)
 milestone_scene_tag = re.compile(r'<milestone.*scene', re.I)
-milestone_poem_tag = re.compile(r'<milestone.*poem', re.I)
+milestone_poem_tag = re.compile(r'<milestone.*[P|p]oem', re.I)
 milestone_bekker_tag = re.compile(r'<milestone.*bekker page', re.I)
 milestone_Bekker_tag = re.compile(r'<milestone.*Bekker', re.I)
 book_attribute = re.compile(r'<.*?type=\"[Bb]ook\".*?n=\"(.*?)\"', re.I)
@@ -264,7 +264,7 @@ div_card_tag = re.compile(r'<div.*card', re.I)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
 refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state) (\w+="[\w\.]*")* *(\w+="[\w\.]*")* *(\w+="[\w\.]*")* */>', re.I)
-refState_tag = re.compile(r'<(cRefPattern|refState|state) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
+refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
 
@@ -687,16 +687,17 @@ class XMLParser:
                             stateline = m.group(i).split("=")
                             k = stateline[0]
                             v = ''.join(stateline[1:])
-                            #(k,v) = m.group(i).split("=")
-                            self.refStates[v.strip('"')] = {"level": self.refState_level}
-                            # loop through all the other attributes and save them
-                            for j in [x for x in range(2,5) if x != i]:
-                                if m.group(j):
-                                    stateline = m.group(j).split("=")
-                                    k2 = stateline[0]
-                                    v2 = ''.join(stateline[1:])
-                                    #(k2,v2) = m.group(j).split("=")
-                                    self.refStates[v.strip('"')][k2] = v2.strip('"')
+                            if "chunk" not in v:
+                                #(k,v) = m.group(i).split("=")
+                                self.refStates[v.strip('"')] = {"level": self.refState_level}
+                                # loop through all the other attributes and save them
+                                for j in [x for x in range(2,5) if x != i]:
+                                    if m.group(j):
+                                        stateline = m.group(j).split("=")
+                                        k2 = stateline[0]
+                                        v2 = ''.join(stateline[1:])
+                                        #(k2,v2) = m.group(j).split("=")
+                                        self.refStates[v.strip('"')][k2] = v2.strip('"')
 
     def tag_handler(self, tag):
         """Tag handler for parser."""
