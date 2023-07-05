@@ -1030,7 +1030,9 @@ if (f):
     if 'fix_load' not in f:
         function_content = "\
 \n                    // #fix_load was here#\
-\n                    if ((!scope.textObject.metadata_fields.head || !/[0-9a-z]+\./i.test(scope.textObject.metadata_fields.head)) && scope.textObject.metadata_fields.n) {\
+\n                    if (scope.textObject.metadata_fields.head && scope.textObject.metadata_fields.type == 'line') {\
+\n                        scope.textObject.metadata_fields.whereami = scope.textObject.metadata_fields.head;\
+\n                    } else if ((!scope.textObject.metadata_fields.head || !/[0-9a-z]+\./i.test(scope.textObject.metadata_fields.head)) && scope.textObject.metadata_fields.n) {\
 \n                        scope.textObject.metadata_fields.whereami = scope.textObject.metadata_fields.n;\
 \n                    } else if (!scope.textObject.metadata_fields.head && scope.textObject.metadata_fields.abbrev) {\
 \n                       scope.textObject.metadata_fields.whereami = scope.textObject.metadata_fields.abbrev;\
