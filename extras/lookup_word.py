@@ -213,11 +213,16 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
         tokenid = word_id
         lex_connect = sqlite3.connect(db.locals.db_path + "/data/lexicon.db")
         lex_cursor = lex_connect.cursor()
+        tokens_query = "select content from tokens where tokenid=?;"
         auth_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? and authority is not null;"
         parses_query = "select lex,code,lemma,prob,authority from parses where tokenid = ? order by prob desc;"
         shortdefs_query = "select lemma,def from shortdefs where lemma=?"
         Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,Lexicon.lexid,note from Lexicon where Lexicon.lexid=?;" % alt_field
         all_Lexicon_query = "select Lexicon.lemma,Lexicon.code,Lexicon.%s,Lexicon.lexid,note from lexicon where token in (select content from tokens where tokenid=?);" % alt_field
+
+        # grab the real token
+        tokens_result = lex_cursor.execute(tokens_query, (tokenid,)).fetchone()
+        if tokens_result: token = tokens_result[0]
 
         # first check if we have an authorized result
         auth_result = lex_cursor.execute(auth_query, (tokenid, )).fetchone()
