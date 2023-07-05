@@ -31,6 +31,7 @@
 								{{ wordProperties.properties[1].value }}
 								{{ wordProperties.authority }}
 								<div ng-if="wordProperties.properties[2].value" style="display: inline;"> (cp. <a href="https://logeion.uchicago.edu/{{wordProperties.properties[2].value}}" target="_blank"><b>{{wordProperties.properties[2].value}}</b></a>)</div>
+								<div ng-if="wordProperties.properties[3].value" style="display: inline;"> ({{wordProperties.properties[3].value}})</div>
 							</div>
 						</div>
 						</li>
@@ -42,7 +43,7 @@
 										<div class="col-xs-12">
 										{{ altPos[0] }}
 										<div ng-if="altPos[2]" style="display: inline;"> (cp. <a href="https://logeion.uchicago.edu/{{altPos[2]}}" target="_blank"><b>{{altPos[2]}}</b></a>)</div>
-										<div ng-if="altPos[3]" style="display: inline;"> (<b>{{altPos[3]}}</b>)</div>
+										<div ng-if="altPos[3]" style="display: inline;"> ({{altPos[3]}})</div>
 										</div>
 									</div>
 								</li>
@@ -72,6 +73,8 @@
 										<div class="col-xs-6">
 											{{ altPos[0] }}
 										</div>
+										<div ng-if="altPos[2]" style="display: inline;"> (cp. <a href="https://logeion.uchicago.edu/{{altPos[2]}}" target="_blank"><b>{{altPos[2]}}</b></a>)</div>
+                                                                                <div ng-if="altPos[3]" style="display: inline;"> ({{altPos[3]}})</div>
 									</div>
 								</li>
 							</ol>
