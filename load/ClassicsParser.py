@@ -264,7 +264,8 @@ div_card_tag = re.compile(r'<div.*card', re.I)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
 refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state) (\w+="[\w\.]*")* *(\w+="[\w\.]*")* *(\w+="[\w\.]*")* */>', re.I)
-refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
+#refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
+refState_tag = re.compile(r'<(cRefPattern|refState|state|step) ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* */>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
 
@@ -688,6 +689,7 @@ class XMLParser:
                             k = stateline[0]
                             v = ''.join(stateline[1:])
                             if "chunk" not in v:
+                                #print(k, v)
                                 #(k,v) = m.group(i).split("=")
                                 self.refStates[v.strip('"')] = {"level": self.refState_level}
                                 # loop through all the other attributes and save them
