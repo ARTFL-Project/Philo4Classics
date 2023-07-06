@@ -54,8 +54,10 @@ def concat_milestones(loader,text):
         elif type == "div2":
             if "n" in record.attrib:
                 if "div1" in current_n.keys() and current_n["div1"] not in abbrev:
-                    current_n["div2"] = current_n["div1"] + "." + record.attrib["n"]
-                    #record.attrib["head"] = abbrev + current_n["div2"]
+                    if record.attrib["type"] != "Bekker" and "Arist." not in abbrev:
+                        current_n["div2"] = current_n["div1"] + "." + record.attrib["n"]
+                    else:
+                        current_n["div2"] = record.attrib["n"]
                     record.attrib["head"] = current_n["div2"]
                 else:
                     record.attrib["head"] = record.attrib["n"]
