@@ -529,6 +529,7 @@ class XMLParser:
         self.open_chapter = False
         self.open_section = False
         self.using_cards = False
+        self.using_Bekker = False # for Bekker pages
         self.got_a_div2 = False
         self.is_drama = False
         self.is_poetry = False
@@ -975,10 +976,11 @@ class XMLParser:
                 self.open_div2 = True
 #            elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_card_tag.search(tag) or milestone_chapter_tag.search(tag):
             #elif milestone_Bekker_tag.search(tag) or milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
+            elif milestone_Bekker_tag.search(tag):
+                self.using_Bekker = True
             elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
                 #if self.open_section and self.got_a_div and (not self.got_a_div2 or self.got_a_milestone):
                 if self.got_a_div and (not self.got_a_div2 or self.got_a_milestone):
-                    #print(tag, file=sys.stderr)
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
@@ -986,6 +988,9 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div2")
                     if milestone_poem_tag.search(tag):
                         self.v["div2"]["type"] = "poem"
+                    elif milestone_bekker_tag.search(tag):
+                        self.v["div2"]["type"] = "Bekker"
+                        self.using_Bekker = True
                     else:
                         self.v["div2"]["type"] = "chapter"
                     self.open_div2 = True
@@ -999,6 +1004,9 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div1")
                     if milestone_poem_tag.search(tag):
                         self.v["div1"]["type"] = "poem"
+                    elif milestone_bekker_tag.search(tag):
+                        self.v["div2"]["type"] = "Bekker"
+                        self.using_Bekker = True
                     else:
                         self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
@@ -1011,7 +1019,10 @@ class XMLParser:
                         self.close_div3(div3_end_byte)
                     self.v.push("div3", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div3")
-                    self.v["div3"]["type"] = "section"
+                    if self.using_Bekker:
+                        self.v["div3"]["type"] = "Bekker"
+                    else:
+                        self.v["div3"]["type"] = "section"
                     self.open_div3 = True
                     self.open_section = True
                 elif not self.open_chapter and self.got_a_div:
@@ -1020,7 +1031,10 @@ class XMLParser:
                         self.close_div2(div2_end_byte)
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
-                    self.v["div2"]["type"] = "section"
+                    if self.using_Bekker:
+                        self.v["div2"]["type"] = "Bekker"
+                    else:
+                        self.v["div2"]["type"] = "section"
                     self.open_div2 = True
                     self.open_section = True
                 elif not self.open_chapter and not self.got_a_div:
@@ -1029,10 +1043,13 @@ class XMLParser:
                         self.close_div1(div1_end_byte)
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
-                    self.v["div1"]["type"] = "section"
+                    if self.using_Bekker:
+                        self.v["div2"]["type"] = "Bekker"
+                    else:
+                        self.v["div2"]["type"] = "section"
                     self.open_div1 = True
                     self.open_section = True
-            elif milestone_line_tag.search(tag) and self.got_a_div1:
+            elif milestone_line_tag.search(tag) and self.got_a_div1 and not self.using_Bekker:
                 if self.open_div2:  # account for unclosed milestone tags
                     div2_end_byte = self.bytes_read_in - len(tag)
                     self.close_div2(div2_end_byte)
