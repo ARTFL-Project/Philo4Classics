@@ -585,6 +585,8 @@ class XMLParser:
         for k, v in self.known_metadata.items():
             self.v["doc"][k] = v
 
+        print(self.known_metadata["filename"])
+
         # let's grab the CTS urn from the abbrevs file, if available
         try:
             self.urn = self.abbrevs_urns[self.known_metadata["filename"]]
@@ -1043,9 +1045,9 @@ class XMLParser:
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
                     if self.using_Bekker:
-                        self.v["div2"]["type"] = "Bekker"
+                        self.v["div1"]["type"] = "Bekker"
                     else:
-                        self.v["div2"]["type"] = "section"
+                        self.v["div1"]["type"] = "section"
                     self.open_div1 = True
                     self.open_section = True
             elif milestone_line_tag.search(tag) and self.got_a_div1 and not self.using_Bekker:
