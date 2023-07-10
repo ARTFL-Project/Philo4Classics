@@ -265,7 +265,8 @@ refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
 refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state) (\w+="[\w\.]*")* *(\w+="[\w\.]*")* *(\w+="[\w\.]*")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
-refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* *(\w+=".*?")* */>', re.I)
+#refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* *(\w+=".*?")* */>', re.I)
+refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
 
@@ -585,7 +586,7 @@ class XMLParser:
         for k, v in self.known_metadata.items():
             self.v["doc"][k] = v
 
-        print(self.known_metadata["filename"])
+        #print(self.known_metadata["filename"])
 
         # let's grab the CTS urn from the abbrevs file, if available
         try:
@@ -682,17 +683,21 @@ class XMLParser:
         if self.in_refsDecl:
             m = refState_tag.search(tag)
             if m:
+                #print(m.group(0))
                 self.refState_level += 1
                 for i in range(2,5):
                     # find the "unit" so we can use it as the key
                     if m.group(i):
                         #if "unit" or "n=" in m.group(i):
                         if re.match(r'^(unit|n)=".*?"', m.group(i), flags=re.I):
+                            #print(m.group(i))
                             stateline = m.group(i).split("=")
                             k = stateline[0]
                             v = ''.join(stateline[1:])
+                            #print(k,v)
                             if "chunk" not in v:
                                 #(k,v) = m.group(i).split("=")
+                                #print(k,v)
                                 self.refStates[v.strip('"')] = {"level": self.refState_level}
                                 # loop through all the other attributes and save them
                                 for j in [x for x in range(2,5) if x != i]:
