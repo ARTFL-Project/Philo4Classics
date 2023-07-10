@@ -5,7 +5,7 @@ Apul. Met.	book-chapter	ApuleiusMetLat.xml			urn:cts:latinLit:phi1212.phi002
 Aug.	section	AugustusLat.xml	AugustusEn.xml		urn:cts:latinLit:phi1221.phi007
 August.	letter-section	AugustineEpLat.xml			urn:cts:latinLit:stoa0040.stoa011
 Bede	book-chapter	BedeHistoriamLat.xml			urn:cts:latinLit:stoa0054.stoa006
-Boeth. Consol.	book-sectio	BoethConsolLat.xml	BoethConsolEn.xml		urn:cts:latinLit:stoa0058.stoa001
+Boeth. Consol.	book-sectio	BoethConsLat.xml	BoethConsolEn.xml		urn:cts:latinLit:stoa0058.stoa001
 Caes. Civ.	book-chapter-section	CaesarCivilWarLat.xml	CaesarCivilWarEn.xml		urn:cts:latinLit:phi0448.phi002
 Caes. Gal.	book-chapter-section	CaesarGallicWarLat.xml	CaesarGallicWarEn.xml		urn:cts:latinLit:phi0448.phi001
 Catul.	poem-line	CatullusLat.xml	CatullusEn.xml	CatullusEn2.xml	urn:cts:latinLit:phi0472.phi001
@@ -127,7 +127,7 @@ Prudent. Hamar.	section	PrudHamarLat.xml			urn:cts:latinLit:stoa0238.stoa006
 Prudent. Perist.	poem	PrudPeristLat.xml			urn:cts:latinLit:stoa0238.stoa001
 Prudent. Praef.	book	PrudPraefLat.xml			urn:cts:latinLit:stoa0238.stoa003
 Prudent. Psych.	section	PrudPsychLat.xml			urn:cts:latinLit:stoa0238.stoa002
-Quint.	book-chapter-section	QuintilianInstLat.xml	QuintilianInstEn.xml		urn:cts:latinLit:phi1002.phi001
+Quint.	book-chapter-section	phi1002.phi001.perseus-lat2.xml	QuintilianInstEn.xml		urn:cts:latinLit:phi1002.phi001
 Sal. Cat.	section	SallustCatilineLat.xml	SallustCatilineEn.xml		urn:cts:latinLit:phi0631.phi001
 Sal. Jug.	section	SallustJugurthineLat.xml	SallustJugurthineEn.xml		urn:cts:latinLit:phi0631.phi002
 Sen. Ag.	line	SenAgLat.xml			urn:cts:latinLit:phi1017.phi007
