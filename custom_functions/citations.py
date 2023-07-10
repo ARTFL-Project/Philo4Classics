@@ -72,8 +72,9 @@ def get_label(hit, citation_object):
     #print(get_cts_divs(hit), file=sys.stderr)
     #print("Div3 type: " + hit.div3.philo_type, file=sys.stderr)
     #print("Div3 head: " + hit.div3.head, file=sys.stderr)
+
     # first check if we're dealing with a special case for cards
-    if obj_type in get_cts_divs(hit) or hit.div3.philo_type != "div3" or hit.div3.head == "":
+    if obj_type in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card"):
         valid_type = True
 
     if citation_object["object_level"].startswith("div") and valid_type:
