@@ -3,7 +3,8 @@
 
 import re
 
-from philologic.runtime.citations import citation_links, citations
+#from philologic.runtime.citations import citation_links, citations
+from .citations import citation_links, citations
 from philologic.runtime.get_text import get_text
 from .ObjectFormatter import adjust_bytes, format_strip
 from philologic.runtime.pages import page_interval
@@ -77,8 +78,13 @@ def kwic_hit_object(hit, config, db):
         combined_author.append(title)
         metadata_fields["title"] = ""
 
-    # add section numbers to the citation title
+    # Combine div heads for citation display
+    combined_sections = []
+    for cit in citation:
+        if ("div" in cit["object_type"]): combined_sections.append(cit["label"])
+    metadata_fields["head"] = '.'.join(combined_sections)
 
+    # add section numbers to the citation title
     if metadata_fields["head"].replace('.', '').isnumeric():
         combined_author.append(metadata_fields["head"])
     else:
