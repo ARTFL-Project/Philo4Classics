@@ -1957,7 +1957,7 @@ if (f):
         new_f = re.sub(r'(\s*)(if el.tag not in allowed_tags:)', r'\1\2\1    if inHeader and el.tag != "div":\1        el.attrib["class"] = "noshow"' , new_f, flags=re.S)
         show.progress()
         # add bibl urn handling
-        new_f = re.sub(r'"br"\]', r'"br", "bibl"]', new_f, flags=re.S)
+        new_f = re.sub(r'"br"\]', r'"br", "bibl", "quote", "q", "title"]', new_f, flags=re.S)
         show.progress()
         content = 'if el.tag == "bibl":\
 \n            el.tag = "a"\
