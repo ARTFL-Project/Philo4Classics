@@ -67,6 +67,7 @@ def get_label(hit, citation_object):
     # for divs, make sure that the current level's type is one listed in the refdecl, which are saved in cts_divs in the doc level
     valid_type = False
     obj_type = getattr(hit, citation_object["object_level"]).type.lower()
+    obj_subtype = getattr(hit, citation_object["object_level"]).subtype.lower()
     #print(citation_object["object_level"], file=sys.stderr)
     #print(obj_type, file=sys.stderr)
     #print(get_cts_divs(hit), file=sys.stderr)
@@ -74,7 +75,7 @@ def get_label(hit, citation_object):
     #print("Div3 head: " + hit.div3.head, file=sys.stderr)
 
     # first check if we're dealing with a special case for cards
-    if obj_type in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card"):
+    if obj_type in get_cts_divs(hit) or obj_subtype in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card"):
         valid_type = True
 
     if citation_object["object_level"].startswith("div") and valid_type:
