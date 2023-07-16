@@ -612,8 +612,8 @@ class XMLParser:
             if self.in_the_text is False:
                 if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line):
                     self.in_the_text = True
-                    #print("%d refsDecl states found: " % len(self.refStates))
-                    #pprint(self.refStates, indent=5)
+                    print("%d refsDecl states found: " % len(self.refStates))
+                    pprint(self.refStates, indent=5)
         
                     # this is a convenient place to also push the refStates into the metadata
                     for i in range(1,4):
@@ -698,15 +698,16 @@ class XMLParser:
                             if "chunk" not in v:
                                 #(k,v) = m.group(i).split("=")
                                 #print(k,v)
-                                self.refStates[v.strip('"')] = {"level": self.refState_level}
-                                # loop through all the other attributes and save them
-                                for j in [x for x in range(2,5) if x != i]:
-                                    if m.group(j):
-                                        stateline = m.group(j).split("=")
-                                        k2 = stateline[0]
-                                        v2 = ''.join(stateline[1:])
-                                        #(k2,v2) = m.group(j).split("=")
-                                        self.refStates[v.strip('"')][k2] = v2.strip('"')
+                                if v.strip('"') not in self.refStates.keys():
+                                    self.refStates[v.strip('"')] = {"level": self.refState_level}
+                                    # loop through all the other attributes and save them
+                                    for j in [x for x in range(2,5) if x != i]:
+                                        if m.group(j):
+                                            stateline = m.group(j).split("=")
+                                            k2 = stateline[0]
+                                            v2 = ''.join(stateline[1:])
+                                            #(k2,v2) = m.group(j).split("=")
+                                            self.refStates[v.strip('"')][k2] = v2.strip('"')
 
     def tag_handler(self, tag):
         """Tag handler for parser."""
