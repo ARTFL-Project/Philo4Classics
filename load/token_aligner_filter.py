@@ -54,6 +54,7 @@ def concat_milestones(loader,text):
 
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
+            if record_type == "Bekker": record_type = "section" # Bekker accommodation
 
         if using_cts and type in ["div1", "div2", "div3"]:
             record_head = ""
