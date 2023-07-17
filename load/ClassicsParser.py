@@ -612,8 +612,8 @@ class XMLParser:
             if self.in_the_text is False:
                 if text_tag.search(line) or doc_body_tag.search(line) or body_tag.search(line):
                     self.in_the_text = True
-                    print("%d refsDecl states found: " % len(self.refStates))
-                    pprint(self.refStates, indent=5)
+                    #print("%d refsDecl states found: " % len(self.refStates))
+                    #pprint(self.refStates, indent=5)
         
                     # this is a convenient place to also push the refStates into the metadata
                     for i in range(1,4):

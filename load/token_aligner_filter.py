@@ -26,18 +26,51 @@ def concat_milestones(loader,text):
     
     current_n = {}
     abbrev = ""
+    cts_div1 = ""
+    cts_div2 = ""
+    cts_div3 = ""
+    cts_div1_head = ""
+    cts_div2_head = ""
+    cts_div3_head = ""
+    record_type = ""
+    using_cts = False
+
     for line in open(text["sortedtoms"]):
         type, name, id, attrib = line.split('\t')
         id = id.split()
         record = Record(type,name,id)
         record.attrib = eval(attrib)
 
-        #if type == "doc":
         if "abbrev" in record.attrib:
             abbrev = record.attrib["abbrev"] + " "
         #        #print("FOUND ABBREV %s" % abbrev, file=sys.stderr)
 
-        if type == "div1":
+        if type == "doc":
+            # get cts_divs if available, in order to help construct the 'head'
+            if "cts_div1" in record.attrib: cts_div1 = record.attrib["cts_div1"]
+            if "cts_div2" in record.attrib: cts_div2 = record.attrib["cts_div2"]
+            if "cts_div3" in record.attrib: cts_div3 = record.attrib["cts_div3"]
+            if cts_div1 or cts_div2 or cts_div3: using_cts = True
+
+        if "type" in record.attrib:
+            record_type = record.attrib["type"].lower()
+
+        if using_cts and type in ["div1", "div2", "div3"]:
+            record_head = ""
+            if "head" in record.attrib: record_head = record.attrib["head"]
+            #print("head: %s" % record_head, file=sys.stderr)
+            for i in range(1,3):
+                #print("type: %s, cts_div: %s" % (record_type, eval("cts_div%s" % i)), file=sys.stderr)
+                if record_type == eval("cts_div%s" % i) and record_head:
+                    # building head strictly based on refsDecl
+                    if i == 1: cts_div1_head = record.attrib["n"]
+                    if i == 2: cts_div2_head = '.'.join([cts_div1_head, record_head])
+                    if i == 3: cts_div3_head = '.'.join([cts_div2_head, record_head])
+                    #print("cts_div%d_head: (%s)" % (i, eval("cts_div%s_head" % i)), file=sys.stderr)
+                    record.attrib["head"] = eval("cts_div%s_head" % i)
+                    break
+        
+        elif type == "div1":
             if "n" in record.attrib:
                 current_n["div1"] = record.attrib["n"]
                 #record.attrib["head"] = abbrev + record.attrib["n"]
@@ -48,7 +81,6 @@ def concat_milestones(loader,text):
                         record.attrib["head"] = record.attrib["n"]
                 else:
                     record.attrib["head"] = record.attrib["n"]
-                #print(record.attrib["head"], file=sys.stderr)
             if "div2" in current_n: del current_n["div2"]
             if "div3" in current_n: del current_n["div3"]
         elif type == "div2":
@@ -65,8 +97,7 @@ def concat_milestones(loader,text):
         elif type == "div3":
             if "n" in record.attrib:
                 isLine = False
-                if "type" in record.attrib:
-                    if record.attrib["type"] == "line": isLine = True
+                if record.attrib["type"] == "line": isLine = True
                 if "div2" in current_n.keys() and not isLine:
                     current_n["div3"] = current_n["div2"] + "." + record.attrib["n"]
                     #record.attrib["head"] = abbrev + current_n["div3"]
