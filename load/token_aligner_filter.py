@@ -57,11 +57,17 @@ def concat_milestones(loader,text):
             if record_type == "Bekker": record_type = "section" # Bekker accommodation
 
         if using_cts and type in ["div1", "div2", "div3"]:
+
             record_head = ""
-            if "head" in record.attrib: record_head = record.attrib["head"]
-            #print("head: %s" % record_head, file=sys.stderr)
-            for i in range(1,3):
-                #print("type: %s, cts_div: %s" % (record_type, eval("cts_div%s" % i)), file=sys.stderr)
+            if "n" or "head" in record.attrib:
+                if "n" in record.attrib: record_head = record.attrib["n"]
+                if "head" in record.attrib:
+                    if record.attrib["head"].isdigit(): record_head = record.attrib["head"]
+            else: continue
+
+            #print("head: %s, type: %s" % (record_head, record_type), file=sys.stderr)
+            for i in range(1,4):
+                #print("type: %s, cts_div: %s, range: %s" % (record_type, eval("cts_div%s" % i), i), file=sys.stderr)
                 if record_type == eval("cts_div%s" % i) and record_head:
                     # building head strictly based on refsDecl
                     if i == 1: cts_div1_head = record.attrib["n"]
