@@ -963,6 +963,7 @@ class XMLParser:
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
                     self.v["div2"]["type"] = "card"
+                    self.v["div2"]["head"] = str(n_attribute.search(tag).group(1))
                     self.open_div2 = True
                     self.using_cards = True
             elif milestone_act_tag.search(tag):
