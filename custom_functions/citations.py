@@ -89,7 +89,7 @@ def get_label(hit, citation_object):
                 div2_name = get_div2_name(hit)
                 div3_name = ""
                 if hit.div3.philo_type != hit.div2.philo_type:
-                    div3_name = hit.div3.n.strip() or hit.div3.head
+                    div3_name = hit.div3.n.strip() or hit.div3.head.split('.')[-1]
 
                 # if the head of the section combines the book number and section,
                 # and the book number was already grabbed in the div1, then
