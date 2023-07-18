@@ -956,7 +956,7 @@ class XMLParser:
             # tags like unclosed paragraph tags but labeled as
             # either div1 or div2 so that they show up in the table
             # of contents
-            elif milestone_card_tag.search(tag):
+            elif milestone_card_tag.search(tag) and len(self.refStates) < 3: # do not use cards when we have a 3-level structure
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
