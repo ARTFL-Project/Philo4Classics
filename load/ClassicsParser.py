@@ -256,6 +256,7 @@ semi_colon_strip = re.compile(r"\A;?(\w+);?\Z")
 h_tag = re.compile(r"<h(\d)>", re.I)
 is_drama = re.compile(r"<term>.*?drama.*?</term>", re.I)
 is_poetry = re.compile(r"<term>.*?poetry.*?</term>", re.I)
+is_poem = re.compile(r'<div.*?"poem".*?>', re.I)
 line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
 milestone_line_tag = re.compile(r'<milestone.*line', re.I)
 div_card_tag = re.compile(r'<div.*card', re.I)
@@ -1080,13 +1081,14 @@ class XMLParser:
 
              ## ACT-SCENE-LINE structure without cards
             elif line_n_tag.search(tag) and (self.is_drama or self.is_poetry):
+                #print("We have a line!")
                 if self.open_div3:  # account for unclosed line tags
                     div3_end_byte = self.bytes_read_in - len(tag)
                     self.close_div3(div3_end_byte)
                 self.v.push("div3", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "div3")
                 self.v["div3"]["type"] = "line"
-                #print("Line number: %s" % n_attribute.search(tag).group(1))
+                #print("Line number: %s" % str(n_attribute.search(tag).group(1)))
                 self.open_div3 = True
                 self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
                 
@@ -1254,6 +1256,7 @@ class XMLParser:
                     m = book_attribute.search(tag)
                     if m:
                         self.v["div"]["book"] = m.group(1)
+                    if is_poem.search(tag): self.is_poetry = True
                     self.get_object_attributes(tag, tag_name, object_type="div1")
                     #print("div1 attribs %s" % self.v["div1"])
 #                elif div_type == "div2" and not self.using_cards:
