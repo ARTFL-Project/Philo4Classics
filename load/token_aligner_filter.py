@@ -29,9 +29,10 @@ def concat_milestones(loader,text):
     cts_div1 = ""
     cts_div2 = ""
     cts_div3 = ""
-    cts_div1_head = ""
-    cts_div2_head = ""
-    cts_div3_head = ""
+    #cts_div1_head = ""
+    #cts_div2_head = ""
+    #cts_div3_head = ""
+    cts_div_heads = {}
     record_type = ""
     using_cts = False
 
@@ -62,19 +63,25 @@ def concat_milestones(loader,text):
             if "n" or "head" in record.attrib:
                 if "n" in record.attrib: record_head = record.attrib["n"]
                 if "head" in record.attrib:
-                    if record.attrib["head"].isdigit(): record_head = record.attrib["head"]
+                    if record.attrib["head"].isnumeric():
+                        record_head = record.attrib["head"]
             else: continue
 
             #print("head: %s, type: %s" % (record_head, record_type), file=sys.stderr)
             for i in range(1,4):
                 #print("type: %s, cts_div: %s, range: %s" % (record_type, eval("cts_div%s" % i), i), file=sys.stderr)
                 if record_type == eval("cts_div%s" % i) and record_head:
+
+                    # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
+                    for j in range(i + 1,4):
+                        if "cts_div%s" % j in cts_div_heads: del cts_div_heads["cts_div%s" % j]
+
                     # building head strictly based on refsDecl
-                    if i == 1: cts_div1_head = record.attrib["n"]
-                    if i == 2: cts_div2_head = '.'.join([cts_div1_head, record_head])
-                    if i == 3: cts_div3_head = '.'.join([cts_div2_head, record_head])
-                    #print("cts_div%d_head: (%s)" % (i, eval("cts_div%s_head" % i)), file=sys.stderr)
-                    record.attrib["head"] = eval("cts_div%s_head" % i)
+                    cts_div_heads["cts_div%s" % i] = record_head
+                    #print(cts_div_heads)
+                    heads = cts_div_heads.values()
+                    record.attrib["head"] = '.'.join(filter(None, heads))
+                    #print(record.attrib["head"])
                     break
         
         elif type == "div1":
