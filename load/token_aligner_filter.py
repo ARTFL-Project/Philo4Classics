@@ -34,6 +34,7 @@ def concat_milestones(loader,text):
     #cts_div3_head = ""
     cts_div_heads = {}
     record_type = ""
+    record_subtype = ""
     using_cts = False
 
     for line in open(text["sortedtoms"]):
@@ -56,6 +57,8 @@ def concat_milestones(loader,text):
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
             if record_type == "Bekker": record_type = "section" # Bekker accommodation
+        if "subtype" in record.attrib:
+            record_subtype = record.attrib["subtype"].lower()
 
         if using_cts and type in ["div1", "div2", "div3"]:
 
@@ -65,12 +68,12 @@ def concat_milestones(loader,text):
                 if "head" in record.attrib:
                     if record.attrib["head"].isnumeric():
                         record_head = record.attrib["head"]
-            else: continue
+            else: continue 
 
             #print("head: %s, type: %s" % (record_head, record_type), file=sys.stderr)
             for i in range(1,4):
                 #print("type: %s, cts_div: %s, range: %s" % (record_type, eval("cts_div%s" % i), i), file=sys.stderr)
-                if record_type == eval("cts_div%s" % i) and record_head:
+                if (record_type == eval("cts_div%s" % i) or record_subtype == eval("cts_div%s" % i)) and record_head:
 
                     # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
                     for j in range(i + 1,4):
@@ -81,7 +84,6 @@ def concat_milestones(loader,text):
                     #print(cts_div_heads)
                     heads = cts_div_heads.values()
                     record.attrib["head"] = '.'.join(filter(None, heads))
-                    #print(record.attrib["head"])
                     break
         
         elif type == "div1":
