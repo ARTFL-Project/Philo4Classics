@@ -685,12 +685,12 @@ class XMLParser:
             m = refState_tag.search(tag)
             if m:
                 #print(m.group(0))
-                self.refState_level += 1
                 for i in range(2,5):
                     # find the "unit" so we can use it as the key
                     if m.group(i):
                         #if "unit" or "n=" in m.group(i):
                         if re.match(r'^(unit|n)=".*?"', m.group(i), flags=re.I):
+                            self.refState_level += 1
                             #print(m.group(i))
                             stateline = m.group(i).split("=")
                             k = stateline[0]
