@@ -26,12 +26,10 @@ def concat_milestones(loader,text):
     
     current_n = {}
     abbrev = ""
-    cts_div1 = ""
-    cts_div2 = ""
-    cts_div3 = ""
-    #cts_div1_head = ""
-    #cts_div2_head = ""
-    #cts_div3_head = ""
+    #cts_div1 = ""
+    #cts_div2 = ""
+    #cts_div3 = ""
+    cts_divs = {}
     cts_div_heads = {}
     record_type = ""
     record_subtype = ""
@@ -49,10 +47,12 @@ def concat_milestones(loader,text):
 
         if type == "doc":
             # get cts_divs if available, in order to help construct the 'head'
-            if "cts_div1" in record.attrib: cts_div1 = record.attrib["cts_div1"]
-            if "cts_div2" in record.attrib: cts_div2 = record.attrib["cts_div2"]
-            if "cts_div3" in record.attrib: cts_div3 = record.attrib["cts_div3"]
-            if cts_div1 or cts_div2 or cts_div3: using_cts = True
+            if "cts_div1" in record.attrib: cts_divs["cts_div1"] = record.attrib["cts_div1"]
+            if "cts_div2" in record.attrib: cts_divs["cts_div2"] = record.attrib["cts_div2"]
+            if "cts_div3" in record.attrib: cts_divs["cts_div3"] = record.attrib["cts_div3"]
+            if len(cts_divs) > 0:
+                using_cts = True
+                cts_divs = {k: v for k, v in cts_divs.items() if v} #remove empty divs
 
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
@@ -70,13 +70,12 @@ def concat_milestones(loader,text):
                         record_head = record.attrib["head"]
             else: continue 
 
-            #print("head: %s, type: %s" % (record_head, record_type), file=sys.stderr)
-            for i in range(1,4):
-                #print("type: %s, cts_div: %s, range: %s" % (record_type, eval("cts_div%s" % i), i), file=sys.stderr)
-                if (record_type == eval("cts_div%s" % i) or record_subtype == eval("cts_div%s" % i)) and record_head:
+            for i in range(1, len(cts_divs) + 1):
+                print("type: %s, cts_div: %s, range: %s" % (record_type, cts_divs["cts_div%s" % i], i), file=sys.stderr)
+                if (record_type == cts_divs["cts_div%s" % i] or record_subtype == cts_divs["cts_div%s" % i]) and record_head:
 
                     # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
-                    for j in range(i + 1,4):
+                    for j in range(i + 1, len(cts_divs) + 1):
                         if "cts_div%s" % j in cts_div_heads: del cts_div_heads["cts_div%s" % j]
 
                     # building head strictly based on refsDecl
