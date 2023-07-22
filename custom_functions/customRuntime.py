@@ -54,7 +54,7 @@ def get_cts_divs (hit):
     divs.append(hit.doc.cts_div1)
     divs.append(hit.doc.cts_div2)
     divs.append(hit.doc.cts_div3)
-    return divs
+    return [x for x in divs if x]
 
 def expand_codes ( code ):
     expanded = ""
