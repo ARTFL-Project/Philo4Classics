@@ -50,9 +50,10 @@ def concat_milestones(loader,text):
             if "cts_div1" in record.attrib: cts_divs["cts_div1"] = record.attrib["cts_div1"]
             if "cts_div2" in record.attrib: cts_divs["cts_div2"] = record.attrib["cts_div2"]
             if "cts_div3" in record.attrib: cts_divs["cts_div3"] = record.attrib["cts_div3"]
+            cts_divs = {k: v for k, v in cts_divs.items() if v} #remove empty divs
+            #print(cts_divs, file=sys.stderr)
             if len(cts_divs) > 0:
                 using_cts = True
-                cts_divs = {k: v for k, v in cts_divs.items() if v} #remove empty divs
 
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
@@ -71,7 +72,7 @@ def concat_milestones(loader,text):
             else: continue 
 
             for i in range(1, len(cts_divs) + 1):
-                print("type: %s, cts_div: %s, range: %s" % (record_type, cts_divs["cts_div%s" % i], i), file=sys.stderr)
+                #print("type: %s, cts_div: %s, range: %s" % (record_type, cts_divs["cts_div%s" % i], i), file=sys.stderr)
                 if (record_type == cts_divs["cts_div%s" % i] or record_subtype == cts_divs["cts_div%s" % i]) and record_head:
 
                     # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
@@ -132,7 +133,7 @@ def fix_card_milestones(loader, text):
         id = id.split()
         record = Record(type, word, id)
         record.attrib = eval(attrib) 
-        if "type" in record.attrib and record.attrib["type"] == "card":
+        if "type" in record.attrib and record.attrib["type"] == "card" and "head" in record.attrib:
             if last_card:
                 last_card.attrib["head"] = last_card.attrib["head"] + " - " + record.attrib["head"]
                 print(last_card, file=temp_file)
