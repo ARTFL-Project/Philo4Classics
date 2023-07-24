@@ -94,7 +94,8 @@ def generate_toc_object(request, config):
 #                        if display_name == "__philo_virtual":
 #                            display_name = text["philo_type"]
 
-            display_name = display_name[0].upper() + display_name[1:]
+            #display_name = display_name[0].upper() + display_name[1:]
+            display_name = display_name[0] + display_name[1:]
             link = make_absolute_object_link(config, philo_id.split()[: philo_slices[philo_type]])
             philo_id = " ".join(philo_id.split()[: philo_slices[philo_type]])
             toc_element = {"philo_id": philo_id, "philo_type": philo_type, "label": display_name, "href": link}
