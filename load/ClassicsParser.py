@@ -192,7 +192,7 @@ parag_with_attrib_tag = re.compile(r"<p ", re.I)
 milestone_tag = re.compile(r'<milestone', re.I)
 milestone_chapter_tag = re.compile(r'<milestone.*=\"(chapter|page)', re.I)
 milestone_section_tag = re.compile(r'<milestone.*\"section', re.I)
-milestone_card_tag = re.compile(r'<milestone.*card', re.I)
+milestone_card_tag = re.compile(r'<milestone.*"card"', re.I)
 milestone_act_tag = re.compile(r'<milestone.*[^n]="act"', re.I)
 milestone_scene_tag = re.compile(r'<milestone.*scene', re.I)
 milestone_poem_tag = re.compile(r'<milestone.*[P|p]oem', re.I)
@@ -427,6 +427,11 @@ class XMLParser:
             self.defined_words_to_index = True
         else:
             self.defined_words_to_index = False
+
+        if "cts_collection" in parse_options:
+            if parse_options["cts_collection"].lower() in ["yes", "y"]: self.cts_collection = True
+            if parse_options["cts_collection"].lower() in ["no", "n"]: self.cts_collection = False
+        else: self.cts_collection = True
 
         if "file_type" in parse_options:
             self.file_type = parse_options["file_type"]
@@ -678,6 +683,8 @@ class XMLParser:
     def header_handler(self, tag):
         if refsDecl_open_tag.search(tag):
             self.in_refsDecl = True
+            self.refStates = {}
+            self.refState_level = 0
         elif refsDecl_close_tag.search(tag):
             self.in_refsDecl = False
 
@@ -690,13 +697,13 @@ class XMLParser:
                     if m.group(i):
                         #if "unit" or "n=" in m.group(i):
                         if re.match(r'^(unit|n)=".*?"', m.group(i), flags=re.I):
-                            self.refState_level += 1
                             #print(m.group(i))
                             stateline = m.group(i).split("=")
                             k = stateline[0]
                             v = ''.join(stateline[1:])
                             #print(k,v)
                             if "chunk" not in v:
+                                self.refState_level += 1
                                 #(k,v) = m.group(i).split("=")
                                 #print(k,v)
                                 if v.strip('"') not in self.refStates.keys():
@@ -1075,7 +1082,8 @@ class XMLParser:
                 self.v.push("div3", tag_name, start_byte)
                 self.get_object_attributes(tag, tag_name, "div3")
                 self.v["div3"]["type"] = "card"
-                self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
+                if n_attribute.search(tag):
+                    self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
                 self.open_div3 = True
                 self.using_cards = True
 
