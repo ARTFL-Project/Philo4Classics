@@ -176,7 +176,8 @@ def get_div2_name(hit):
                 label = hit.div2["head"] or hit.div2["type"] or hit.div2["philo_name"] or hit.div2["philo_type"]
     if label:
         try:
-            label = label[0].upper() + label[1:]
+            #label = label[0].upper() + label[1:]
+            label = label[0] + label[1:]
             label = label.strip()
         except IndexError:
             pass
