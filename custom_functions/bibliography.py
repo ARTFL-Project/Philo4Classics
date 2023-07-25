@@ -33,7 +33,8 @@ def bibliography_results(request, config):
                 request.metadata["head"] = m.group(1)
 
 	    # first do the search with quotes around the head
-            request.metadata['head'] = '"%s"' % request.metadata['head']
+            if '"' not in request.metadata['head']:
+                request.metadata['head'] = '"%s"' % request.metadata['head']
         hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
         if "head" in request.metadata:
