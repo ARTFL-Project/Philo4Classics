@@ -332,27 +332,28 @@ for f in files2group:
 ###     index tokenid in words table          ###
 #################################################
 
-print("tokenid index exists? ", end="")
-db = DB(myload_path + '/data/')
-cursor = db.dbh.cursor()
-query = "select * from sqlite_master where type='index';"
-cursor.execute(query)
-tokenid_index_exists = False
-for row in cursor.fetchall():
-    if "tokenid" in row["name"]:
-        tokenid_index_exists = True
-        print("yes!")
-        break
+if type_of_fix == "dictionary":
+    print("tokenid index exists? ", end="")
+    db = DB(myload_path + '/data/')
+    cursor = db.dbh.cursor()
+    query = "select * from sqlite_master where type='index';"
+    cursor.execute(query)
+    tokenid_index_exists = False
+    for row in cursor.fetchall():
+        if "tokenid" in row["name"]:
+            tokenid_index_exists = True
+            print("yes!")
+            break
 
-if not tokenid_index_exists:
-    print("no!")
-    print("Building words_tokenid_index in toms.db...", end="", flush=True)
-    query = "create index words_tokenid_index on words (tokenid);"
-    try:
-        cursor.execute(query)
-        print("done!")
-    except:
-        print("No tokenid column. Skip.")
+    if not tokenid_index_exists:
+        print("no!")
+        print("Building words_tokenid_index in toms.db...", end="", flush=True)
+        query = "create index words_tokenid_index on words (tokenid);"
+        try:
+            cursor.execute(query)
+            print("done!")
+        except:
+            print("No tokenid column. Skip.")
 
 #################################################
 ###      Copy over Custom Functions           ###
@@ -1779,7 +1780,7 @@ navigationBar_html = re.sub('Table of contents', '{{ textObject.metadata_fields.
 show.progress()
 
 # Add a button to go to translation load; translation is defined in navigation.py
-button = '<a ng-if="philoConfig.translation_dbname != \'\'" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>{{philoConfig.translation_lang}}</span></a>'
+button = '<a ng-if="philoConfig.translation_dbname !== undefined && philoConfig.translation_dbname !== \'\'" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>{{philoConfig.translation_lang}}</span></a>'
 navigationBar_html = re.sub('</button>\s*</div>', '</button>\n%s\n</div>' % button, navigationBar_html, flags=re.S)
 show.progress()
 
