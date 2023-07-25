@@ -1950,8 +1950,10 @@ f = regexmatch(r'format_concordance.*?elif el.tag == "title":', ObjectFormatter_
 if (f):
     f = f.group()
     if "fix_load" not in f:
+        # pass in the full config
+        new_f = re.sub('format_concordance(text_in_utf8', 'format_concordance(config, text_in_utf8', f, flags=re.S)
         # add header suppression handling 
-        new_f = re.sub(r'(\s*)(allowed_tags.*?\))', r'\1\2\1non_header_tags = set(["div1", "div2", "div3", "milestone", "text", "head", "body", "castList"])\1inHeader = True' , f, flags=re.S)
+        new_f = re.sub(r'(\s*)(allowed_tags.*?\))', r'\1\2\1non_header_tags = set(["div1", "div2", "div3", "milestone", "text", "head", "body", "castList"])\1inHeader = True' , new_f, flags=re.S)
         show.progress()
         new_f = re.sub(r'(\s*)(for el in xml.iter\(\):)', r'\1\2\1    if el.tag in allowed_tags or el.tag in non_header_tags:\1        inHeader = False' , new_f, flags=re.S)
         show.progress()
@@ -1968,7 +1970,7 @@ if (f):
 \n                if urn and cite:\
 \n                    if "greek" in urn: text_load = config.Greek_dbname\
 \n                    if "latin" in urn: text_load = config.Latin_dbname\
-\n                    el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%%22%s%%22\' % (urn, cite)\
+\n                    el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
 \n                    el.attrib["target"] = "_blank"'      
         new_f = re.sub(r'(\s*)(elif el.tag == "title":)', r'\1#fix_load was here\1' + content + r'\1\2', new_f, flags=re.S)
         show.progress()
@@ -1997,7 +1999,7 @@ if (f):
 \n                    if urn and cite:\
 \n                        if "greek" in urn: text_load = config.Greek_dbname\
 \n                        if "latin" in urn: text_load = config.Latin_dbname\
-\n                        el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%%22%s%%22\' % (urn, cite)\
+\n                        el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
 \n                        el.attrib["target"] = "_blank"'      
         new_f = re.sub(r'(\s*)(elif el.tag == "head":)', r'\1#fix_load was here\1' + content + r'\1\2', f, flags=re.S)
         show.progress()
