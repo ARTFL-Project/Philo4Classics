@@ -84,7 +84,8 @@ def filter_words_by_property(request, config):
                 else:
                     new_citation.append(cit)
 
-            context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+            #context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+            context = get_concordance_text(db, hit, config, config.concordance_length)
             result_obj = {
                 "philo_id": hit.philo_id,
                 "citation": new_citation,

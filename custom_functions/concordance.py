@@ -147,7 +147,8 @@ def concordance_results(request, config):
             else:
                 new_citation.append(cit)
 
-        context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+        #context = get_concordance_text(db, hit, config.db_path, config.concordance_length)
+        context = get_concordance_text(db, hit, config, config.concordance_length)
         if formatting_regexes:
             for formatting_regex, replacement in formatting_regexes:
                 context = formatting_regex.sub(r"%s" % replacement, context)

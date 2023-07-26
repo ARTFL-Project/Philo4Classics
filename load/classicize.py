@@ -332,7 +332,7 @@ for f in files2group:
 ###     index tokenid in words table          ###
 #################################################
 
-if type_of_fix == "dictionary":
+if type_of_fix != "dictionary":
     print("tokenid index exists? ", end="")
     db = DB(myload_path + '/data/')
     cursor = db.dbh.cursor()
@@ -1928,6 +1928,31 @@ close_for_mod(word_property_filter_path, word_property_filter)
 print(" (done)")
 
 #################################################
+###       custom_functions/get_text.py        ###
+#################################################
+
+# read in and fix get_text 
+get_text_py = open_for_mod(get_text_path, 'r').read()
+
+print ("get_text.py", end="")
+
+# pass full config to get_concordance_text function
+f = regexmatch(r'get_concordance_text\(.*?return conc_text', get_text_py, re.S)
+if (f):
+    f = f.group()
+    if "fix_load" not in f:
+        new_f = re.sub('get_concordance_text\(db, hit, path', 'get_concordance_text(db, hit, config', f, flags=re.S)
+        show.progress()
+        new_f = re.sub(r'(\s*)(## Determine length of text needed)', r'\1# fix_load was here\1path = config.db_path\1\2', new_f, flags=re.S)
+        show.progress()
+        new_f = re.sub('format_concordance\(conc_text', 'format_concordance(config, conc_text', new_f, flags=re.S)
+        show.progress()
+        get_text_py = re.sub(re.escape(f), new_f, get_text_py, flags=re.S)
+
+close_for_mod(get_text_path, get_text_py)
+print(" (done)")
+
+#################################################
 ###    custom_functions/ObjectFormatter.py    ###
 #################################################
 
@@ -1951,7 +1976,7 @@ if (f):
     f = f.group()
     if "fix_load" not in f:
         # pass in the full config
-        new_f = re.sub('format_concordance(text_in_utf8', 'format_concordance(config, text_in_utf8', f, flags=re.S)
+        new_f = re.sub('format_concordance\(text_in_utf8', 'format_concordance(config, text_in_utf8', f, flags=re.S)
         # add header suppression handling 
         new_f = re.sub(r'(\s*)(allowed_tags.*?\))', r'\1\2\1non_header_tags = set(["div1", "div2", "div3", "milestone", "text", "head", "body", "castList"])\1inHeader = True' , new_f, flags=re.S)
         show.progress()
