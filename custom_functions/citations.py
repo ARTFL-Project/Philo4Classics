@@ -47,7 +47,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
     citation = []
     for citation_object in citation_type:
         cite = {}
-        cite["label"] = get_label(hit, citation_object)
+        cite["label"] = get_label(config, hit, citation_object)
         if cite["label"]:
             cite["prefix"] = citation_object["prefix"]
             cite["suffix"] = citation_object["suffix"]
@@ -58,7 +58,7 @@ def citations(hit, citation_hrefs, config, report="concordance", citation_type=N
             citation.append(cite)
     return citation
 
-def get_label(hit, citation_object):
+def get_label(config, hit, citation_object):
     """Get metadata labels"""
     label = ""
     if citation_object["object_level"] == "doc":
@@ -71,11 +71,11 @@ def get_label(hit, citation_object):
     #print(citation_object["object_level"], file=sys.stderr)
     #print(obj_type, file=sys.stderr)
     #print(get_cts_divs(hit), file=sys.stderr)
-    #print("Div3 type: " + hit.div3.philo_type, file=sys.stderr)
-    #print("Div3 head: " + hit.div3.head, file=sys.stderr)
+    #print("Div1 type: " + hit.div1.philo_type, file=sys.stderr)
+    #print("Div1 head: " + hit.div1.head, file=sys.stderr)
 
     # first check if we're dealing with a special case for cards
-    if obj_type in get_cts_divs(hit) or obj_subtype in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card"):
+    if obj_type in get_cts_divs(hit) or obj_subtype in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card") or config.dictionary:
         valid_type = True
 
     if citation_object["object_level"].startswith("div") and valid_type:
