@@ -34,7 +34,8 @@ def get_more_context(environ, start_response):
     hits = db.query(request["q"], request["method"], request["arg"],
                     **request.metadata)
     context_size = config['concordance_length'] * 3
-    hit_context = get_concordance_text(db, hits[hit_num], config.db_path,
+    #hit_context = get_concordance_text(db, hits[hit_num], config.db_path,
+    hit_context = get_concordance_text(db, hits[hit_num], config,
                                        context_size)
     yield json.dumps(hit_context).encode('utf8')
 
