@@ -2056,7 +2056,7 @@ if (f):
     if 'fix_load' not in f:
         new_f = re.sub(r"^( *)(.*)", r"#\1\2 #fix_load", f, flags=re.M) 
         content = '\
-\n    allowed_tags = set(["head", "item", "quote", "p", "div", "foreign", "milestone", "note", "span", "philoHighlight", "w"])\
+\n    allowed_tags = set(["head", "item", "quote", "p", "div", "foreign", "milestone", "note", "span", "philoHighlight", "w", "author", "i", "title", "itype", "tns", "gen", "bibl", "orth", "pron", "abbr", "sense", "gram", "Grp", "cit", "date", "placeName", "etym"])\
 \n    found_highlight = False\
 \n    for el in xml.iter():\
 \n        orig_tag = el.tag\
@@ -2071,15 +2071,11 @@ if (f):
 \n                    found_highlight = True\
 \n                el.tag = "span"\
 \n                el.attrib["class"] = "highlight"\
-\n            if el.tag == "w":\
+\n            elif el.tag == "w":\
 \n                el.tag = "span"\
 \n                el.attrib["class"] = "xml-w"\
-\n            if el.tag == "quote": el.tag = "l"\
-\n            if el.tag == "p": el.tag = "l"\
-\n            if el.tag == "div": el.tag = "l"\
-\n            if el.tag == "item": el.tag = "l"\
-\n            if el.tag == "milestone": el.tag = "l"\
-\n            if el.tag == "head": el.tag = "l"\
+\n            else:\
+\n                el.tag = "l"\
 \n        else:\
 \n            etree.strip_tags(xml, el.tag)\
 \n    if not found_highlight:\
