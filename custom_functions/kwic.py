@@ -130,7 +130,7 @@ def kwic_hit_object(hit, config, db):
             '<span class="kwic-before"><span class="inner-before">' + conc_text[:start_hit] + "</span></span>"
         )
         #end_hit = conc_text[start_hit:].index("</span>") + 7
-        if isEnglish(conc_text):
+        if isEnglish(conc_text) or config.dictionary:
             end_hit = start_hit + conc_text[start_hit:].index("</span>") + 7 
         else:
             end_hit = start_hit + conc_text[start_hit:].index("</span>") + 14 
