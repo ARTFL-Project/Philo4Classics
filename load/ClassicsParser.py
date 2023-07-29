@@ -1459,7 +1459,7 @@ class XMLParser:
                         # capital letters to avoid hitting abbreviations.
                         elif "." in word:
                             is_sent = True
-                            if len(last_word) < 3:
+                            if len(last_word) < 7:
                                 if cap_char_or_num.search(last_word):
                                     is_sent = False
 
