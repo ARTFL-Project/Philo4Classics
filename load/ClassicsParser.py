@@ -1467,8 +1467,8 @@ class XMLParser:
                             if next_word.islower() or next_word.isdigit():
                                 is_sent = False
 
-                        elif word in self.sentence_breakers:
-                            is_sent = True
+                        elif word.strip(' ') in self.sentence_breakers:
+                           is_sent = True
 
                         if is_sent:
                             # a little hack--we don't know the punctuation mark that will end a sentence
