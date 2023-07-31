@@ -260,6 +260,7 @@ is_poem = re.compile(r'<div.*?"poem".*?>', re.I)
 line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
 milestone_line_tag = re.compile(r'<milestone.*line', re.I)
 div_card_tag = re.compile(r'<div.*card', re.I)
+div_dsection_tag = re.compile(r'<div.*\"(dsection|dchapter)', re.I)
 
 # CTS and refsDecl stuff (WMS)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
@@ -592,7 +593,7 @@ class XMLParser:
         for k, v in self.known_metadata.items():
             self.v["doc"][k] = v
 
-        #print(self.known_metadata["filename"])
+        print(self.known_metadata["filename"])
 
         # let's grab the CTS urn from the abbrevs file, if available
         try:
@@ -968,12 +969,15 @@ class XMLParser:
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
-                    self.v.push("div2", tag_name, start_byte)
-                    self.get_object_attributes(tag, tag_name, "div2")
-                    self.v["div2"]["type"] = "card"
-                    self.v["div2"]["head"] = str(n_attribute.search(tag).group(1))
-                    self.open_div2 = True
-                    self.using_cards = True
+                    if n_attribute.search(tag):
+                        self.v.push("div2", tag_name, start_byte)
+                        self.get_object_attributes(tag, tag_name, "div2")
+                        self.v["div2"]["type"] = "card"
+                        self.v["div2"]["head"] = str(n_attribute.search(tag).group(1))
+                        self.open_div2 = True
+                        self.using_cards = True
+                    else:
+                        print("Warning: ignoring un-numbered milestone card: %s" % tag)
             elif milestone_act_tag.search(tag):
                 if self.open_div1:  # account for unclosed milestone tags
                     div1_end_byte = self.bytes_read_in - len(tag)
@@ -1197,7 +1201,7 @@ class XMLParser:
             # - I output <head> info where I find it.  This could also be modified to output
             #   a structured table record with div type, and other attributes, along with
             #   the Philoid and head for searching under document levels.
-            elif (closed_div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_card_tag.search(tag)):
+            elif (closed_div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_card_tag.search(tag) and not div_dsection_tag.search(tag)):
             #elif (closed_div_tag.search(tag) and not self.is_drama):
                 if "div1" in tag_name:
                     if self.in_front_matter:
@@ -1214,7 +1218,7 @@ class XMLParser:
                 self.context_div_level -= 1
                 self.no_deeper_objects = False
             #elif (div_tag.search(tag) and not self.is_drama and not div_edition_tag.search(tag)):
-            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag)):
+            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag) and not div_dsection_tag.search(tag)):
                 # if we have refStates, then use those to determine level, otherwise increment arbitrarily
                 self.found_cts_level = False
                 if div_tag_cts.search(tag):
