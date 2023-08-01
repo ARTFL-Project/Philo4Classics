@@ -1312,6 +1312,7 @@ if 'bold' not in f:
 \n    font-weight: 700;\
 \n    font-size: 1.2em;\
 \n    margin-bottom: 10px;\
+\n}\
 \n    div[subtype=\"dchapter\"]::before {\
 \n    content: attr(n);\
 \n    font-family: \'LinLibertinePhilo41\', sans-serif;\
@@ -1793,7 +1794,10 @@ navigationBar_html = re.sub('Table of contents', '{{ textObject.metadata_fields.
 show.progress()
 
 # Add a button to go to translation load; translation is defined in navigation.py
-button = '<a ng-if="philoConfig.translation_dbname !== undefined && philoConfig.translation_dbname !== \'\'" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}"><span>{{philoConfig.translation_lang}}</span></a>'
+button = '<a ng-if="philoConfig.translation_dbname !== undefined && philoConfig.translation_dbname !== \'\'" class="btn btn-primary" id="translate" ng-href="{{textObject.translation}}">\
+<ng-template ng-if="philoConfig.translation_lang !== \'\'">{{philoConfig.translation_lang}}</ng-template>\
+<ng-template ng-if="textObject.translation_lang !== \'\' && philoConfig.translation_lang == \'\'">{{textObject.translation_lang}}</ng-template>\
+</span></a>'
 navigationBar_html = re.sub('</button>\s*</div>', '</button>\n%s\n</div>' % button, navigationBar_html, flags=re.S)
 show.progress()
 
