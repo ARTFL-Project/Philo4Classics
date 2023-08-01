@@ -1305,7 +1305,14 @@ if 'bold' not in f:
 \n    font-weight: bold;\
 \n    font-family: \'LinLibertinePhilo41\', sans-serif;\
 \n    font-size: 0.8em;\
-\n}"
+\n}\
+\n    div[subtype=\"dsection\"]::before {\
+\n    content: '§'attr(n);\
+\n    font-family: \'LinLibertinePhilo41\', sans-serif;\
+\n    font-weight: 700;\
+\n    font-size: 1.2em;\
+\n    margin-bottom: 10px;\
+}"
     new_f += content
     show.progress()
     # add chapter numbers in prose for texts using divs instead of milestones
