@@ -1312,6 +1312,12 @@ if 'bold' not in f:
 \n    font-weight: 700;\
 \n    font-size: 1.2em;\
 \n    margin-bottom: 10px;\
+\n    div[subtype=\"dchapter\"]::before {\
+\n    content: attr(n);\
+\n    font-family: \'LinLibertinePhilo41\', sans-serif;\
+\n    font-weight: 700;\
+\n    font-size: 1.2em;\
+\n    margin-bottom: 10px;\
 }"
     new_f += content
     show.progress()
