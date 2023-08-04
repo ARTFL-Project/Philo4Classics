@@ -582,6 +582,8 @@ class XMLParser:
             self.got_a_para = True
         if milestone_card_tag.search(self.content):
             self.using_cards = True
+        if milestone_bekker_tag.search(self.content) or milestone_Bekker_tag.search(self.content):
+            self.using_Bekker = True
         self.cleanup_content()
 
         # Begin by creating a document level object, just call it "text" for now.
@@ -996,8 +998,6 @@ class XMLParser:
                 self.open_div2 = True
 #            elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_card_tag.search(tag) or milestone_chapter_tag.search(tag):
             #elif milestone_Bekker_tag.search(tag) or milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
-            elif milestone_Bekker_tag.search(tag):
-                self.using_Bekker = True
             elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
                 #if self.open_section and self.got_a_div and (not self.got_a_div2 or self.got_a_milestone):
                 if self.got_a_div and (not self.got_a_div2 or self.got_a_milestone):
@@ -1008,9 +1008,8 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div2")
                     if milestone_poem_tag.search(tag):
                         self.v["div2"]["type"] = "poem"
-                    elif milestone_bekker_tag.search(tag):
+                    elif self.using_Bekker:
                         self.v["div2"]["type"] = "Bekker"
-                        self.using_Bekker = True
                     else:
                         self.v["div2"]["type"] = "chapter"
                     self.open_div2 = True
@@ -1024,9 +1023,8 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div1")
                     if milestone_poem_tag.search(tag):
                         self.v["div1"]["type"] = "poem"
-                    elif milestone_bekker_tag.search(tag):
-                        self.v["div2"]["type"] = "Bekker"
-                        self.using_Bekker = True
+                    elif self.using_Bekker:
+                        self.v["div1"]["type"] = "Bekker"
                     else:
                         self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
