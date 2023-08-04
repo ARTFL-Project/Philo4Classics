@@ -268,7 +268,8 @@ refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state) (\w+="[\w\.]*")* *(\w+="[\w\.]*")* *(\w+="[\w\.]*")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* *(\w+=".*?")* */>', re.I)
-refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
+#refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
+refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* *((unit|n)=".*?")* */>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
 
@@ -695,30 +696,19 @@ class XMLParser:
             m = refState_tag.search(tag)
             if m:
                 #print(m.group(0))
-                for i in range(2,5):
-                    # find the "unit" so we can use it as the key
-                    if m.group(i):
-                        #if "unit" or "n=" in m.group(i):
-                        if re.match(r'^(unit|n)=".*?"', m.group(i), flags=re.I):
-                            #print(m.group(i))
-                            stateline = m.group(i).split("=")
-                            k = stateline[0]
-                            v = ''.join(stateline[1:])
-                            #print(k,v)
-                            if "chunk" not in v:
-                                self.refState_level += 1
-                                #(k,v) = m.group(i).split("=")
-                                #print(k,v)
-                                if v.strip('"') not in self.refStates.keys():
-                                    self.refStates[v.strip('"')] = {"level": self.refState_level}
-                                    # loop through all the other attributes and save them
-                                    for j in [x for x in range(2,5) if x != i]:
-                                        if m.group(j):
-                                            stateline = m.group(j).split("=")
-                                            k2 = stateline[0]
-                                            v2 = ''.join(stateline[1:])
-                                            #(k2,v2) = m.group(j).split("=")
-                                            self.refStates[v.strip('"')][k2] = v2.strip('"')
+                if "chunk" not in m.group(0) or "bekker" in m.group(0):
+                    for i in range(2,6):
+                        # find the "unit" so we can use it as the key
+                        if m.group(i):
+                            if re.match(r'^(unit|n)=".*?"', m.group(i), flags=re.I):
+                                #print(m.group(i))
+                                stateline = m.group(i).split("=")
+                                k = stateline[0]
+                                v = ''.join(stateline[1:]).strip('"')
+                                if v not in self.refStates.keys() and v != "chunk":
+                                    self.refState_level += 1
+                                    self.refStates[v] = {"level": self.refState_level}
+                #print(self.refStates) 
 
     def tag_handler(self, tag):
         """Tag handler for parser."""
