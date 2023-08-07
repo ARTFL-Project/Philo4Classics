@@ -57,7 +57,7 @@ def concat_milestones(loader,text):
 
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
-            if record_type == "Bekker": record_type = "section" # Bekker accommodation
+            if record_type == "bekker": record_type = "section" # Bekker accommodation
         if "subtype" in record.attrib:
             record_subtype = record.attrib["subtype"].lower()
 
@@ -70,6 +70,7 @@ def concat_milestones(loader,text):
                     if record.attrib["head"].isnumeric():
                         record_head = record.attrib["head"]
             else: continue 
+            #print(record_head)
 
             for i in range(1, len(cts_divs) + 1):
                 #print("type: %s, cts_div: %s, range: %s" % (record_type, cts_divs["cts_div%s" % i], i), file=sys.stderr)

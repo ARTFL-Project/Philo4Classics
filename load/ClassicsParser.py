@@ -696,7 +696,8 @@ class XMLParser:
             m = refState_tag.search(tag)
             if m:
                 #print(m.group(0))
-                if "chunk" not in m.group(0) or "bekker" in m.group(0):
+                #if "chunk" not in m.group(0) or "bekker" in m.group(0):
+                if "chunk" not in m.group(0) or self.using_Bekker:
                     for i in range(2,6):
                         # find the "unit" so we can use it as the key
                         if m.group(i):
