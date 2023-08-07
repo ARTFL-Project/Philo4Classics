@@ -79,7 +79,7 @@ def parse_urn(urn):
     return (group, group_id, work, work_id)
 
 def perseus_to_cts_urn(urn):
-    urn_match = re.match(r'^.*?:([a-z]+),([0-9]+),([0-9]+):([0-9:a-e]+)$', urn, re.I)
+    urn_match = re.match(r'^.*?:([a-z]+),([0-9]+),([0-9]+):([0-9:a-eα-ω]+)$', urn, re.I)
     if urn_match:
         lang = {'phi':'latin', 'tlg':'greek', 'pap':'greek'}
         collection = urn_match.group(1)
@@ -101,15 +101,16 @@ def get_cite_from_urn(urn):
 
     try:
         # first check for a URN with an edition
-        urn_match = re.match(r'(urn:cts:\w+:\w+\.\w+\).[\w-]+:*([0-9\.a-e]+)*', urn, re.I)
+        urn_match = re.match(r'(urn:cts:\w+:\w+\.\w+\).[\w-]+:*([0-9\.a-eα-ω]+)*', urn, re.I)
         urn = urn_match.group(1)
         cite = urn_match.group(2)
     except Exception as e:
         try:
             # if the above fails, then we have a URN without edition
-            urn_match = re.match(r'(urn:cts:\w+:\w+\.\w+):*([0-9\.a-e]+)*', urn, re.I)
+            urn_match = re.match(r'(urn:cts:\w+:\w+\.\w+):*([0-9\.a-eα-ω]+)*', urn, re.I)
             urn = urn_match.group(1)
             cite = urn_match.group(2)
+            print(urn_match.group(2), file=sys.stderr)
         except Exception as e:
             # not a valid urn
             return (False, False)
