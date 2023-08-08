@@ -35,6 +35,14 @@ def bibliography_results(request, config):
 	    # first do the search with quotes around the head
             if '"' not in request.metadata['head']:
                 request.metadata['head'] = '"%s"' % request.metadata['head']
+        
+            hits = db.query(sort_order=request["sort_order"], **request.metadata)
+
+            # check to see if we have final greek-letter-section following a period (Hdt.); exclude the final period
+            m = re.match(r'^("[1-9\.]+)\.([α-ω]+")$', request.metadata["head"], re.I)
+            if len(hits) == 0 and m:
+                request.metadata["head"] = m.group(1) + m.group(2)
+
         hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
         if "head" in request.metadata:
@@ -42,7 +50,6 @@ def bibliography_results(request, config):
             # if no results, check to see if we have a range and and search for only the beginning
             if len(hits) == 0 and "-" in request.metadata["head"]:
                 request.metadata["head"] = re.sub(r' *-.*$', '"', request.metadata["head"])
-                print(request.metadata["head"], file=sys.stderr)
                 hits = db.query(sort_order=request["sort_order"], **request.metadata)
 
             ## If 'head' is in the metadata, then first query just the text to see whether it is poetry

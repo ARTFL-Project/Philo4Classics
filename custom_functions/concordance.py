@@ -35,6 +35,14 @@ def concordance_results(request, config):
 
             # first do the search with quotes around the head
             request.metadata['head'] = '"%s"' % request.metadata['head']
+        
+            hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
+
+            # Next, check to see if we have final greek-letter-section following a period (Hdt.), exclude final period
+            m = re.match(r'^("[1-9\.]+)\.([α-ω]+")$', request.metadata["head"], re.I)
+            if len(hits) == 0 and m:
+                request.metadata["head"] = m.group(1) + m.group(2)
+
         hits = db.query(request["q"], request["method"], request["arg"], sort_order=request["sort_order"], **request.metadata)
 
         # If no results, and 'head' is in the metadata, then first query just the text to see whether it is poetry
