@@ -919,6 +919,51 @@ if (f):
         show.progress()
         philoLogic_js = re.sub(re.escape(f), new_f, philoLogic_js, flags=re.S)
 
+# Add PoorSearchFormController
+f = regexmatch(r'\.controller\(\'SearchFormController\'.*?}\)\(\);', philoLogic_js, re.S)
+if (f):
+    f = f.group()
+    if 'fix_load' not in f:
+        content = '\n\
+\n(function() {\
+\n    "use strict";\
+\n\
+\n    angular\
+\n        .module("philoApp")\
+\n        .controller("PoorSearchFormController", PoorSearchFormController)\
+\n\
+\n    function PoorSearchFormController($scope, $rootScope, $http, $location, radio, URL, philoConfig) {\
+\n        var vm = this;\
+\n\
+\n        // Handle radio clicks to workaround clash between angular and bootstrap\
+\n        vm.radioClick = radio.click;\
+\n\
+\n        vm.submit = function() {\
+\n\
+\n            var extraParams = {\
+\n                start: "0",\
+\n                end: "0"\
+\n            };\
+\n\
+\n            const citationRegex = /^(.*) (.*)$/;\
+\n            const m = $rootScope.formData.abbrevq.match(citationRegex);\
+\n            $rootScope.formData.report = "bibliography";\
+\n\
+\n            if (m !== null) {\
+\n                console.log(m);\
+\n                $rootScope.formData.abbrev = m[1];\
+\n                $rootScope.formData.head = m[2];\
+\n            }\
+\n\
+\n            console.log($rootScope.formData);\
+\n            $location.url(URL.objectToUrlString($rootScope.formData, extraParams));\
+\n        }\
+\n    }\
+\n})();'
+        show.progress()
+        new_f = "//fix_load was here\n        " + f + content;
+        philoLogic_js = re.sub(re.escape(f), new_f, philoLogic_js, flags=re.S)
+
 # fix directives for new way of clicking on words to look them up
 #f = re.search(r'\.directive\(\'loading.*?animateOnLoad\)', philoLogic_js, flags=re.S)
 f = regexmatch(r'\.directive\(\'loading.*?animateOnLoad\)', philoLogic_js, re.S)
@@ -1335,6 +1380,21 @@ if 'bold' not in f:
     #swap in new css
     philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
 
+# grab #header .navbar
+f = re.search(r'(#header .navbar \{.*?\})(.*?\})', philoLogic_css, flags=re.S)
+if "navbar-q" not in f.group(2):
+    f = f.group(1)
+    content = '\n\
+\n.navbar-q {\
+\n    vertical-align: middle;\
+\n    display: inline-block;\
+\n    padding-bottom: 10px;\
+\n}'
+    new_f = f + content
+    show.progress()
+    #swap in new css
+    philoLogic_css = re.sub(re.escape(f), new_f, philoLogic_css, flags=re.S)
+
 # grab xml-add, this is to fix pluses and minuses using <> and []
 f = re.search(r'xml-add \{.*?\}', philoLogic_css, flags=re.S)
 f = f.group()
@@ -1664,6 +1724,8 @@ if (f):
         new_f = re.sub(r'<a href=\"https:\/\/artfl-project.uchicago.edu\/content\/contact-us\".*?<\/a>', '<a href="https://forms.gle/zM46MJjMEN279Q2v5" title="Tell us what you really think!">Report a Problem</a>', new_f)
         show.progress()
         new_f = re.sub(r'<a href=\"https:\/\/artfl-project.uchicago.edu\".*?<\/a>', '<!--fix_load was here-->\n\t\t    <a href="https://perseus.uchicago.edu">Perseus UChicago Home</a>', new_f)
+        show.progress()
+        new_f = re.sub(r'(\s*)(<a href=\"\".*?\$DBNAME<\/a>)', r'\1<!--fix_load was here-->\1\2\1<div ng-if="!philoConfig.dictionary" class="navbar-q" ng-controller="PoorSearchFormController as poorSearch">\1\t<form id="poorSearch" role="form" ng-submit="poorSearch.submit()">\1\t\t<input type="text" placeholder="Arist. Eth. Nic. 1094b" name="abbrevq" id="abbrevq" ng-model="formData.abbrevq">\1\t</form>\1</div>', new_f)
         show.progress()
         #swap in new html 
         index_html = re.sub(re.escape(f), new_f, index_html, flags=re.S)
