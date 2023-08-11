@@ -57,7 +57,7 @@ def concat_milestones(loader,text):
 
         if "type" in record.attrib:
             record_type = record.attrib["type"].lower()
-            if record_type == "bekker": record_type = "section" # Bekker accommodation
+            if record_type == "bekker" or record_type == "stephanus": record_type = "section" # Bekker accommodation
         if "subtype" in record.attrib:
             record_subtype = record.attrib["subtype"].lower()
 
@@ -103,7 +103,7 @@ def concat_milestones(loader,text):
         elif type == "div2":
             if "n" in record.attrib:
                 if "div1" in current_n.keys() and current_n["div1"] not in abbrev:
-                    if record.attrib["type"] != "Bekker" and "Arist." not in abbrev:
+                    if record.attrib["type"] != "Bekker" and record.attrib["type"] != "Stephanus":
                         current_n["div2"] = current_n["div1"] + "." + record.attrib["n"]
                     else:
                         current_n["div2"] = record.attrib["n"]

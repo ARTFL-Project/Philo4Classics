@@ -198,6 +198,7 @@ milestone_scene_tag = re.compile(r'<milestone.*scene', re.I)
 milestone_poem_tag = re.compile(r'<milestone.*[P|p]oem', re.I)
 milestone_bekker_tag = re.compile(r'<milestone.*bekker page', re.I)
 milestone_Bekker_tag = re.compile(r'<milestone.*Bekker', re.I)
+milestone_Plato_tag = re.compile(r'<author.*Plato', re.I)
 book_attribute = re.compile(r'<.*?type=\"[Bb]ook\".*?n=\"(.*?)\"', re.I)
 closed_para_tag = re.compile(r"</p>", re.I)
 note_tag = re.compile(r"<note\W", re.I)
@@ -539,6 +540,7 @@ class XMLParser:
         self.open_section = False
         self.using_cards = False
         self.using_Bekker = False # for Bekker pages
+        self.using_Stephanus = False # for Stephanus pages
         self.got_a_div2 = False
         self.is_drama = False
         self.is_poetry = False
@@ -585,6 +587,8 @@ class XMLParser:
             self.using_cards = True
         if milestone_bekker_tag.search(self.content) or milestone_Bekker_tag.search(self.content):
             self.using_Bekker = True
+        if milestone_Plato_tag.search(self.content):
+            self.using_Stephanus = True
         self.cleanup_content()
 
         # Begin by creating a document level object, just call it "text" for now.
@@ -1001,6 +1005,8 @@ class XMLParser:
                         self.v["div2"]["type"] = "poem"
                     elif self.using_Bekker:
                         self.v["div2"]["type"] = "Bekker"
+                    elif self.using_Stephanus:
+                        self.v["div2"]["type"] = "Stephanus"
                     else:
                         self.v["div2"]["type"] = "chapter"
                     self.open_div2 = True
@@ -1016,6 +1022,8 @@ class XMLParser:
                         self.v["div1"]["type"] = "poem"
                     elif self.using_Bekker:
                         self.v["div1"]["type"] = "Bekker"
+                    elif self.using_Stephanus:
+                        self.v["div2"]["type"] = "Stephanus"
                     else:
                         self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
@@ -1030,6 +1038,8 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div3")
                     if self.using_Bekker:
                         self.v["div3"]["type"] = "Bekker"
+                    elif self.using_Stephanus:
+                        self.v["div2"]["type"] = "Stephanus"
                     else:
                         self.v["div3"]["type"] = "section"
                     self.open_div3 = True
@@ -1042,6 +1052,8 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div2")
                     if self.using_Bekker:
                         self.v["div2"]["type"] = "Bekker"
+                    elif self.using_Stephanus:
+                        self.v["div2"]["type"] = "Stephanus"
                     else:
                         self.v["div2"]["type"] = "section"
                     self.open_div2 = True
@@ -1054,11 +1066,13 @@ class XMLParser:
                     self.get_object_attributes(tag, tag_name, "div1")
                     if self.using_Bekker:
                         self.v["div1"]["type"] = "Bekker"
+                    elif self.using_Stephanus:
+                        self.v["div2"]["type"] = "Stephanus"
                     else:
                         self.v["div1"]["type"] = "section"
                     self.open_div1 = True
                     self.open_section = True
-            elif milestone_line_tag.search(tag) and self.got_a_div1 and not self.using_Bekker:
+            elif milestone_line_tag.search(tag) and self.got_a_div1 and not self.using_Bekker and not self.using_Stephanus:
                 if self.open_div2:  # account for unclosed milestone tags
                     div2_end_byte = self.bytes_read_in - len(tag)
                     self.close_div2(div2_end_byte)
