@@ -161,7 +161,7 @@ def bibliography_results(request, config):
                 cit["href"] = citation_hrefs["doc"]
 
             if had_doc:
-                if ((cit["label"].isnumeric() and cit["object_type"] == "div1") or cit["object_type"] != "div1") or not title:
+            if ((cit["label"].isnumeric() and cit["object_type"] == "div1") or (cit["object_type"] != "div1" and cit["label"] != "text") or (not title and cit["label"] != "text")):
                     new_citation.append(cit)
             else:
                 new_citation.append(cit)

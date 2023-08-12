@@ -460,6 +460,7 @@ smartcopy("../extras/lookup_word.py", myload_path + "/scripts/lookup_word.py", f
 smartcopy("../extras/wordObjectDetail.html", myload_path + "/app/shared/wordObjectDetail/wordObjectDetail.html", force=True)
 smartcopy("../extras/get_more_context.py", myload_path + "/scripts/get_more_context.py", force=True)
 smartcopy("../extras/searchLemma.html", myload_path + "/app/shared/searchForm/searchLemma.html")
+smartcopy("../extras/bibliography.html", myload_path + "/app/components/concordanceKwic/bibliography.html", force=True)
 
 #################################################
 #################################################
