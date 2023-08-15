@@ -953,7 +953,7 @@ if (f):
 \n            if (m !== null) {\
 \n                console.log(m);\
 \n                $rootScope.formData.abbrev = m[1];\
-\n                $rootScope.formData.head = m[2];\
+\n                $rootScope.formData.head = m[2].replace(".", ".*");\
 \n            }\
 \n\
 \n            console.log($rootScope.formData);\
