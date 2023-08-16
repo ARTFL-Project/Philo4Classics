@@ -35,6 +35,20 @@ Make sure that you set the correct path for `philologic_path` in `classicize.py`
 philologic_path="/var/www/html/philologic4/"
 ```
 
+If you are loading something like a dictionary or monograph that will have CTS URNs pointing to primary texts, you can set a target Greek and/or Latin load where to pull up those citations:
+
+```python
+Greek_load = "http://some.server.com/philologic4/TextLoad/"
+Latin_load = "http://some.server.com/philologic4/TextLoad/"
+```
+
+If you have a translation load, you can specify it so that users can find the corresponding passage translation from a Greek or Latin load *(you must specify the translation language)*:
+
+```python
+translation_load = ""
+translation_lang = "English"
+```
+
 Unless there are good reasons, the `classicize.py` script should be run after all Philo4Classics custom loads, *but before you do so, make sure to try to load the database in a browser first so that the PhiloLogic4 app initializes certain files:*
 
 ```bash
