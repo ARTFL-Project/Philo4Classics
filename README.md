@@ -45,7 +45,7 @@ Latin_load = "http://some.server.com/philologic4/TextLoad/"
 If you have a translation load, you can specify it so that users can find the corresponding passage translation from a Greek or Latin load *(you must specify the translation language)*:
 
 ```python
-translation_load = ""
+translation_load = "http://some.server.com/philologic4/MyEnglishTranslationLoad/"
 translation_lang = "English"
 ```
 
