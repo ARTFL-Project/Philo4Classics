@@ -26,6 +26,31 @@ def bibliography_results(request, config):
         hits = db.get_all(db.locals["default_object_level"], request["sort_order"])
     else:
 
+        if "abbrev" in request.metadata:
+            # see if this abbrev is a citation and breaking on a space will get us a known abbreviation
+            abbrev = request.metadata["abbrev"]
+            m = re.match(r'^(.*) ([\.0-9]*[a-e]*[α-ω]*)$', abbrev, re.I)
+            if m:
+                print("Trying: " + m.group(1), file=sys.stderr)
+                request.metadata["abbrev"] = '"%s"' % m.group(1)
+
+                hits = db.query(sort_order=request["sort_order"], **request.metadata)
+                if len(hits) > 0:
+                    print(m.group(1), file=sys.stderr)
+                    request.metadata["head"] = m.group(2)
+                else:
+                    # See if the abbreviation has a required space, so break on the first dot 
+                    m = re.match(r'^(.* +[0-9]+)\.*(.*)$', abbrev, re.I)
+                    if m:
+                        print("Trying: " + m.group(1), file=sys.stderr)
+                        request.metadata["abbrev"] = '"%s"' % m.group(1)
+
+                    hits = db.query(sort_order=request["sort_order"], **request.metadata)
+                    if len(hits) > 0:
+                        print(m.group(1), file=sys.stderr)
+                        print(m.group(2), file=sys.stderr)
+                        request.metadata["head"] = m.group(2)
+
         if "head" in request.metadata:
             # This regex will strip line numbers from Bekker pages, and group 1 will exclude them.
             m = re.match(r'^([0-9]+[a-e]+)[\.0-9]*$', request.metadata["head"], re.I)
@@ -87,7 +112,8 @@ def bibliography_results(request, config):
                     else: break
 
             # If we still get no results, check to see if we are dealing with a head combining section and text
-            if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+            #if len(hits) == 0 and ("cts_urn" in request.metadata or "abbrev" in request.metadata):
+            if len(hits) == 0 and "cts_urn" in request.metadata:
                 # first see if we get a hit by combining URN work number
                 metadata_copy = request.metadata.copy()
                 (urn_head, abbrev_head) = get_combined_level(request.metadata["cts_urn"], request.metadata["head"], abbrev)

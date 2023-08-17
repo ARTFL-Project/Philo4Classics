@@ -946,16 +946,8 @@ if (f):
 \n                end: "0"\
 \n            };\
 \n\
-\n            const citationRegex = /^(.*) (.*)$/;\
-\n            const m = $rootScope.formData.abbrevq.match(citationRegex);\
 \n            $rootScope.formData.report = "bibliography";\
-\n\
-\n            if (m !== null) {\
-\n                console.log(m);\
-\n                $rootScope.formData.abbrev = m[1];\
-\n                $rootScope.formData.head = m[2].replace(".", ".*");\
-\n            }\
-\n\
+\n            $rootScope.formData.abbrev = $rootScope.formData.abbrevq\
 \n            console.log($rootScope.formData);\
 \n            $location.url(URL.objectToUrlString($rootScope.formData, extraParams));\
 \n        }\
