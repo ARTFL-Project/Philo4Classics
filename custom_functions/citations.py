@@ -74,6 +74,10 @@ def get_label(config, hit, citation_object):
     #print("Div1 type: " + hit.div1.philo_type, file=sys.stderr)
     #print("Div1 head: " + hit.div1.head, file=sys.stderr)
 
+    # accommodate Bekker and Stephanus sections
+    if obj_type in ['bekker', 'stephanus']: obj_type = 'section'
+    if obj_subtype in ['bekker', 'stephanus']: obj_type = 'section'
+
     # first check if we're dealing with a special case for cards
     if obj_type in get_cts_divs(hit) or obj_subtype in get_cts_divs(hit) or hit.div3.philo_type != "div3" or (hit.div3.head == "" and hit.div2.type == "card") or config.dictionary:
         valid_type = True
