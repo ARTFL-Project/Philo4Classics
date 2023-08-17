@@ -1023,7 +1023,7 @@ class XMLParser:
                     elif self.using_Bekker:
                         self.v["div1"]["type"] = "Bekker"
                     elif self.using_Stephanus:
-                        self.v["div2"]["type"] = "Stephanus"
+                        self.v["div1"]["type"] = "Stephanus"
                     else:
                         self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
@@ -1039,7 +1039,7 @@ class XMLParser:
                     if self.using_Bekker:
                         self.v["div3"]["type"] = "Bekker"
                     elif self.using_Stephanus:
-                        self.v["div2"]["type"] = "Stephanus"
+                        self.v["div3"]["type"] = "Stephanus"
                     else:
                         self.v["div3"]["type"] = "section"
                     self.open_div3 = True
@@ -1067,7 +1067,7 @@ class XMLParser:
                     if self.using_Bekker:
                         self.v["div1"]["type"] = "Bekker"
                     elif self.using_Stephanus:
-                        self.v["div2"]["type"] = "Stephanus"
+                        self.v["div1"]["type"] = "Stephanus"
                     else:
                         self.v["div1"]["type"] = "section"
                     self.open_div1 = True
