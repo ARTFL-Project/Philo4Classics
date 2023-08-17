@@ -118,7 +118,7 @@ def prev_next_obj(*philo_types):
 
         # I'm going to do some pre-sorting here to fix some
         # navigation problems WMS
-        os.system("cat %s | sort -t ' ' -k1,1 -k2,2n -k3,3n > %s" % (text["sortedtoms"], text["raw"] + '.tmp'))
+        os.system("cat %s | sort -t ' ' -k1,1 -k2,2n -k3,3n -k4,4n > %s" % (text["sortedtoms"], text["raw"] + '.tmp'))
         os.system("mv %s %s" % (text["raw"] + '.tmp', text["sortedtoms"]))
 
         record_dict = {}
