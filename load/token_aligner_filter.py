@@ -136,7 +136,10 @@ def fix_card_milestones(loader, text):
         record.attrib = eval(attrib) 
         if "type" in record.attrib and record.attrib["type"] == "card" and "head" in record.attrib:
             if last_card:
-                last_card.attrib["head"] = last_card.attrib["head"] + " - " + str(int(record.attrib["head"]) - 1)
+                try:
+                    last_card.attrib["head"] = last_card.attrib["head"] + " - " + str(int(record.attrib["head"]) - 1)
+                except:
+                    pass
                 print(last_card, file=temp_file)
             last_card = record
         else:
