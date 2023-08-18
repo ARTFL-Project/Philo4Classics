@@ -1073,15 +1073,26 @@ class XMLParser:
                     self.open_div1 = True
                     self.open_section = True
             elif milestone_line_tag.search(tag) and self.got_a_div1 and not self.using_Bekker and not self.using_Stephanus:
-                if self.open_div2:  # account for unclosed milestone tags
-                    div2_end_byte = self.bytes_read_in - len(tag)
-                    self.close_div2(div2_end_byte)
-                self.v.push("div2", tag_name, start_byte)
-                self.get_object_attributes(tag, tag_name, "div2")
-                self.v["div2"]["type"] = "card"
-                self.v["div2"]["head"] = str(n_attribute.search(tag).group(1))
-                self.open_div2 = True
-                self.using_cards = True
+                # this is true when there are no milestone cards
+                if not self.using_cards:
+                    if self.open_div2:  # account for unclosed milestone tags
+                        div2_end_byte = self.bytes_read_in - len(tag)
+                        self.close_div2(div2_end_byte)
+                    self.v.push("div2", tag_name, start_byte)
+                    self.get_object_attributes(tag, tag_name, "div2")
+                    self.v["div2"]["type"] = "card"
+                    self.v["div2"]["head"] = str(n_attribute.search(tag).group(1))
+                    self.open_div2 = True
+                    self.using_cards = True
+                else: #otherwise, treat these line milestones as real lines
+                    if self.open_div3:  # account for unclosed milestone tags
+                        div3_end_byte = self.bytes_read_in - len(tag)
+                        self.close_div3(div3_end_byte)
+                    self.v.push("div3", tag_name, start_byte)
+                    self.get_object_attributes(tag, tag_name, "div3")
+                    self.v["div3"]["type"] = "line"
+                    self.v["div3"]["head"] = str(n_attribute.search(tag).group(1))
+                    self.open_div3 = True
             elif div_card_tag.search(tag):
                 if self.open_div3:  # account for unclosed milestone tags
                     div3_end_byte = self.bytes_read_in - len(tag)
