@@ -1266,6 +1266,11 @@ if 'Libertine' not in philoLogic_css:
     \n    font-weight: normal;\
     \n    font-style: normal;\
     \n    font-display: swap;\
+    \n}\
+    \n\
+    \n@media print {\
+    \n    a:after { content:\'\'; }\
+    \n    a[href]:after { content: none !important; }\
     \n}"
     new_f += content
     show.progress()
