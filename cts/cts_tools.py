@@ -81,7 +81,7 @@ def parse_urn(urn):
 def perseus_to_cts_urn(urn):
     urn_match = re.match(r'^.*?:([a-z]+),([0-9]+),([0-9]+):([0-9:a-eα-ω]+)$', urn, re.I)
     if urn_match:
-        lang = {'phi':'latin', 'tlg':'greek', 'pap':'greek'}
+        lang = {'stoa':'latin', 'phi':'latin', 'tlg':'greek', 'pap':'greek'}
         collection = urn_match.group(1)
 
         # check if we have a known collection
