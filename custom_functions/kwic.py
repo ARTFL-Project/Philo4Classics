@@ -88,7 +88,12 @@ def kwic_hit_object(hit, config, db):
     if metadata_fields["head"].replace('.', '').isnumeric():
         combined_author.append(metadata_fields["head"])
     else:
-        if metadata_fields["head"].replace('.', '').replace(' ', '').isalnum() and metadata_fields["n"] in metadata_fields["head"]:
+        if config.dictionary:
+            if metadata_fields["head"] and metadata_fields["n"]:
+                combined_author.append(metadata_fields["head"] + metadata_fields["n"])
+            else:
+                combined_author.append(metadata_fields["head"])
+        elif metadata_fields["head"].replace('.', '').replace(' ', '').isalnum() and metadata_fields["n"] in metadata_fields["head"]:
             combined_author.append(metadata_fields["head"].replace('.', '. '))
         else:
             combined_author.append(metadata_fields["n"])
