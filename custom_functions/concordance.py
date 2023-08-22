@@ -27,6 +27,10 @@ def concordance_results(request, config):
         second_hits = db.query(request["left"], request["method"], request["arg"], **request.metadata)
         hits = CombinedHitlist(first_hits, second_hits)
     else:
+        # if 'head' is in the metadata, but blank, then remove it from the metadata to avoid false search
+        if "head" in request.metadata:
+            if not request.metadata["head"]: del request.metadata["head"]
+
         # This regex will strip line numbers from  Bekker pages; group 1 will exclude them.
         if "head" in request.metadata:
             m = re.match(r'^([0-9]+[a-e]+)[\.0-9]*$', request.metadata["head"], re.I)
