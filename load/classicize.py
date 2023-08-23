@@ -914,6 +914,36 @@ if (type_of_fix == "text"):
             web_config = re.sub(re.escape(f.group()), new_f, web_config, flags=re.S)
             show.progress()
 
+    # don't display year in simple landing citation
+    # comment out
+    f = regexmatch(r'(simple_landing_citation = \[.*?\},.*?)(\n[\s#]*{[\s#]*?\'field\': \'year\'.*?\},)', web_config, re.S)
+    if (f):
+        if '#' not in f.group(2):
+            #print(re.sub(r'\n', r'\n#', f.group(2), flags=re.S))
+            new_f = f.group(1) + re.sub(r'\n', r'\n#', f.group(2), flags=re.S)
+            web_config = re.sub(re.escape(f.group()), new_f, web_config, flags=re.S)
+            show.progress()
+
+    # don't display pub_place in simple landing citation
+    # comment out
+    f = regexmatch(r'(simple_landing_citation = \[.*?\},.*?)(\n[\s#]*{[\s#]*?\'field\': \'pub_place\'.*?\},)', web_config, re.S)
+    if (f):
+        if '#' not in f.group(2):
+            #print(re.sub(r'\n', r'\n#', f.group(2), flags=re.S))
+            new_f = f.group(1) + re.sub(r'\n', r'\n#', f.group(2), flags=re.S)
+            web_config = re.sub(re.escape(f.group()), new_f, web_config, flags=re.S)
+            show.progress()
+
+    # don't display publisher in simple landing citation
+    # comment out
+    f = regexmatch(r'(simple_landing_citation = \[.*?\},.*?)(\n[\s#]*{[\s#]*?\'field\': \'publisher\'.*?\},)', web_config, re.S)
+    if (f):
+        if '#' not in f.group(2):
+            #print(re.sub(r'\n', r'\n#', f.group(2), flags=re.S))
+            new_f = f.group(1) + re.sub(r'\n', r'\n#', f.group(2), flags=re.S)
+            web_config = re.sub(re.escape(f.group()), new_f, web_config, flags=re.S)
+            show.progress()
+
 close_for_mod(web_config_path, web_config)
 print(" (done)")
 
