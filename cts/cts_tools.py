@@ -232,5 +232,13 @@ def get_lang(subcollection):
         error_log(e, "Unknown subcollection %s" % subcollection)
         return False
 
+def get_cts_divs(hit):
+    divs = []
+    for i in range(1,4):
+        div = "cts_div" + str(i)
+        divs.append(hit[div].lower())
+
+    return divs
+
 def error_log(e, msg):
     print('[CTS API Error] %s. Python Response: "%s"' % (msg, e), file=sys.stderr)

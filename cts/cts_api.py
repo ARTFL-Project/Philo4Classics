@@ -11,7 +11,7 @@ from philologic.runtime.DB import DB
 sys.path.append("..")
 from philologic.runtime.get_text import get_text
 from philologic.runtime.HitList import CombinedHitlist
-from .cts_tools import parse_request, validate_request, parse_urn, get_cite_from_urn, clean_text, XML_validate, decrement_level, get_parent_level, get_combined_level
+from .cts_tools import parse_request, validate_request, parse_urn, get_cite_from_urn, clean_text, XML_validate, decrement_level, get_parent_level, get_combined_level, get_cts_divs
 
 # custom response
 xmlresponse='<>%s</response>'
@@ -76,10 +76,7 @@ def request_GetCapabilities(cts_config, config, request):
         workcontent = [work_id, work, lang, hit["title"], hit["title"], hit["filename"]]
         w = XML_builder(xmlwork, workcontent)
 
-        citationcontent = []
-        for i in range(1,4):
-            div = "cts_div" + str(i)
-            citationcontent.append(hit[div])
+        citationcontent = get_cts_divs(hit)
         c = XMLcitationMapping(citationcontent)
 
         if tg and w and c:
@@ -102,6 +99,9 @@ def request_GetValidReff(cts_config, config, request):
     for t in text: philo_id = t["philo_id"]
     if not philo_id: return (3, "Unknown urn")
 
+    #get cts_divs so we only match appropriate heads
+    valid_types = get_cts_divs(t)
+
     # get all heads for the text
     cursor = db.dbh.cursor()
     text_id = philo_id.split()[0]
@@ -112,6 +112,22 @@ def request_GetValidReff(cts_config, config, request):
     gvr = "<GetValidReff>%s<reply><reff>" % (XML_builder(xmlrequest, requestcontent))
 
     for row in cursor.fetchall():
+    
+        # Get the row type or subtype 
+        try:
+            div_type = row["type"].lower()
+        except Exception as e:
+            div_type = ""
+
+        try:
+            div_subtype = row["subtype"].lower()
+        except Exception as e:
+            div_subtype = ""
+
+        # if either the type or subtype is valid (from the refsDecl), then pass, otherwise skip
+        if any([x for x in valid_types if div_type == x]): pass
+        elif any([x for x in valid_types if div_subtype == x]): pass
+        else: continue
 
         # check if a passage was included in the request, in which case, limit the responses to only that section
         if cite:
