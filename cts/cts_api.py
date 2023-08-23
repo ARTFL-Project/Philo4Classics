@@ -148,7 +148,6 @@ def request_GetPassage(cts_config, config, request):
     if cite:
         db = DB(config.db_path + "/data/")
         metadata = {"cts_urn": urn, "head": cite}
-        hits = db.query(sort_order="", **metadata)
 
         #################################################################################
         ### If we get no hits then jump through some hoops to find the correct 'head' ###
@@ -225,28 +224,33 @@ def request_GetPassage(cts_config, config, request):
 
         #################################################################################
 
-        for hit in hits:
-            # first get the cts_divs from the doc level 
-            philo_id = hit["philo_id"]
-            philo_doc = ' '.join([philo_id.split(' ')[0]] + ['0' for i in philo_id.split(' ')[1:]])
-            cursor = db.dbh.cursor()
-            query = 'select * from toms where philo_id == "%s";' % philo_doc
-            cursor.execute(query)
-            (cts_div1, cts_div2, cts_div3) = cursor.fetchone()[14:17]
+        # strip quotes from cite
+        cite = cite.strip('"')
 
-            # find out at what div level we are fetching xml text
-            # so that we know what levels above it to wrap around
-            # the fetched xml
-            div_level = len([i for i in philo_id.split(' ') if i != '0']) - 1
+        metadata = {"cts_urn": urn}
+        text = db.query(sort_order="", **metadata)
+
+        #get philo_id for text urn
+        philo_id = ""
+        for t in text: philo_id = t["philo_id"]
+
+        # get the cts_divs, remove empty elements
+        cts_divs = list(filter(None, get_cts_divs(t))) 
+
+        for hit in hits:
 
             div_wrapper = "#XML"
             tei_wrapper = "<tei:TEI><tei:text><tei:body>#XML</tei:body></tei:text></tei:TEI>"
 
+            # find out at what div level we are fetching xml text
+            # so that we know what levels above it to wrap around
+            # the fetched xml
+            div_type = hit["type"]
+            div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
             # create the div wrapper
-            #print(div_level, file=sys.stderr)
-            for i in list(reversed(range(div_level)))[:-1]:
-                div_type = vars()["cts_div" + str(i)]
-                div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
+            for div in cts_divs:
+                if div_type == div: break
+                div_wrapper = '<tei:div type="%s">' % (div) + div_wrapper + '</tei:div>'
 
             if hit["head"].startswith(cite) and hit["cts_urn"] == urn:
                 philo_id = hit["philo_id"]
