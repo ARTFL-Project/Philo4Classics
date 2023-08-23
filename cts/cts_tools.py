@@ -74,27 +74,27 @@ def parse_urn(urn):
     fields = urn.split(":")
     try:
         group = ':'.join(fields[:4]).split('.')[0]
-    except IndexError:
+    except Exception as e:
         group = False
-        print("Malformed group in URN %s" % urn, file=sys.stderr)
+        error_log(e, "Malformed group in URN %s" % urn)
 
     try:
         group_id = ':'.join(fields[2:4]).split('.')[0]
-    except IndexError:
+    except Exception as e:
         group_id = False
-        print("Malformed group id in URN %s" % urn, file=sys.stderr)
+        error_log(e, "Malformed group id in URN %s" % urn)
 
     try:
         work = urn
-    except IndexError:
+    except Exception as e:
         work = False
-        print("Malformed work in URN %s" % urn, file=sys.stderr)
+        error_log(e, "Malformed work in URN %s" % urn)
 
     try:
         work_id = ':'.join([fields[2], fields[3].split('.')[1]])
-    except IndexError:
+    except Exception as e:
         work_id = False
-        print("Malformed work id in URN %s" % urn, file=sys.stderr)
+        error_log(e, "Malformed work id in URN %s" % urn)
 
     return (group, group_id, work, work_id)
 
@@ -219,3 +219,6 @@ def get_combined_level(urn, head, abbrev):
         abbrev_head = False
 
     return (urn_head, abbrev_head)
+
+def error_log(e, msg):
+    print('[CTS API Error] %s. Python Response: "%s"' % (msg, e), file=sys.stderr)
