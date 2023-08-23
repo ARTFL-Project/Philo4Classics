@@ -20,7 +20,7 @@ xmlresponse='<>%s</response>'
 error_response='<cts:%s xmlns:m="http://mulberrytech.com/xslt/util" xmlns:cts="http://chs.harvard.edu/xmlns/cts3" xmlns:tei="http://www.tei-c.org/ns/1.0"><cts:request><cts:requestName>%s</cts:requestName></cts:request><CTSError><message>%s</message><code>%s</code></CTSError></cts:%s>'
 xmlinventory='<TextInventory xmlns="http://chs.harvard.edu/xmlns/cts3/ti" xmlns:dc="http://purl.org/dc/elements/1.1/" tiversion="3.0.rc1">%s</TextInventory>'
 xmltextgroup='<textgroup projid="%s" urn="%s"><groupname xml:lang="eng">%s</groupname>#XML#</textgroup> '
-xmlwork='<work projid="%s" urn="%s"><title xml:lang="eng">%s</title><edition><label>%s</label><online docname="%s">#XML#</online></edition></work>'
+xmlwork='<work projid="%s" urn="%s" xml:lang="%s"><title xml:lang="eng">%s</title><edition><label>%s</label><online docname="%s">#XML#</online></edition></work>'
 xmlrequest='<request><requestName>%s</requestName><requestUrn>%s</requestUrn></request>'
 xmlgetpassage='<cts:GetPassage xmlns:m="http://mulberrytech.com/xslt/util" xmlns:cts="http://chs.harvard.edu/xmlns/cts3" xmlns:tei="http://www.tei-c.org/ns/1.0"><cts:request><cts:requestName>GetPassage</cts:requestName><cts:requestUrn>%s</cts:requestUrn><cts:psg>%s</cts:psg><cts:workUrn>%s</cts:workUrn><cts:groupname>%s</cts:groupname><cts:title>%s</cts:title><cts:versionInfo>5.0.rc2</cts:versionInfo></cts:request><cts:reply>%s</cts:reply></cts:GetPassage>'
 
@@ -67,13 +67,13 @@ def request_GetCapabilities(cts_config, config, request):
     for hit in hits:
         urn = hit["cts_urn"]
         if not urn: continue
-        (group, group_id, work, work_id) = parse_urn(urn)
-        if not group or not group_id or not work or not work_id: continue
+        (lang, group, group_id, work, work_id) = parse_urn(urn)
+        if not lang or not group or not group_id or not work or not work_id: continue
 
         groupcontent = [group_id, group, hit["author"]]
         tg = XML_builder(xmltextgroup, groupcontent)
 
-        workcontent = [work_id, work, hit["title"], hit["title"], hit["filename"]]
+        workcontent = [work_id, work, lang, hit["title"], hit["title"], hit["filename"]]
         w = XML_builder(xmlwork, workcontent)
 
         citationcontent = []

@@ -72,6 +72,9 @@ def validate_request(request):
 
 def parse_urn(urn):
     fields = urn.split(":")
+
+    lang = get_lang(fields[2])
+
     try:
         group = ':'.join(fields[:4]).split('.')[0]
     except Exception as e:
@@ -96,7 +99,7 @@ def parse_urn(urn):
         work_id = False
         error_log(e, "Malformed work id in URN %s" % urn)
 
-    return (group, group_id, work, work_id)
+    return (lang, group, group_id, work, work_id)
 
 def perseus_to_cts_urn(urn):
     urn_match = re.match(r'^.*?:([a-z]+),([0-9]+),([0-9]+):([0-9:a-eα-ω]+)$', urn, re.I)
@@ -219,6 +222,15 @@ def get_combined_level(urn, head, abbrev):
         abbrev_head = False
 
     return (urn_head, abbrev_head)
+
+def get_lang(subcollection):
+
+    subcollection_langs = {"greekLit": "grc", "latinLit": "lat", "hebLit": "heb"}
+    try:
+        return subcollection_langs[subcollection]
+    except Exception as e:
+        error_log(e, "Unknown subcollection %s" % subcollection)
+        return False
 
 def error_log(e, msg):
     print('[CTS API Error] %s. Python Response: "%s"' % (msg, e), file=sys.stderr)
