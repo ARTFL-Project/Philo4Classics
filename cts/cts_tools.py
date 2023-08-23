@@ -72,10 +72,30 @@ def validate_request(request):
 
 def parse_urn(urn):
     fields = urn.split(":")
-    group = ':'.join(fields[:4]).split('.')[0]
-    group_id = ':'.join(fields[2:4]).split('.')[0]
-    work = urn
-    work_id = ':'.join([fields[2], fields[3].split('.')[1]])
+    try:
+        group = ':'.join(fields[:4]).split('.')[0]
+    except IndexError:
+        group = False
+        print("Malformed group in URN %s" % urn, file=sys.stderr)
+
+    try:
+        group_id = ':'.join(fields[2:4]).split('.')[0]
+    except IndexError:
+        group_id = False
+        print("Malformed group id in URN %s" % urn, file=sys.stderr)
+
+    try:
+        work = urn
+    except IndexError:
+        work = False
+        print("Malformed work in URN %s" % urn, file=sys.stderr)
+
+    try:
+        work_id = ':'.join([fields[2], fields[3].split('.')[1]])
+    except IndexError:
+        work_id = False
+        print("Malformed work id in URN %s" % urn, file=sys.stderr)
+
     return (group, group_id, work, work_id)
 
 def perseus_to_cts_urn(urn):
