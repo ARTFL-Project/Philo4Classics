@@ -68,6 +68,7 @@ def request_GetCapabilities(cts_config, config, request):
         urn = hit["cts_urn"]
         if not urn: continue
         (group, group_id, work, work_id) = parse_urn(urn)
+        if not group or not group_id or not work or not work_id: continue
 
         groupcontent = [group_id, group, hit["author"]]
         tg = XML_builder(xmltextgroup, groupcontent)
@@ -137,9 +138,21 @@ def request_GetPassage(cts_config, config, request):
         #################################################################################
 
         # If we have Bekker pages with line numbers, then strip the line numbers
-        m = re.match(r'^"([0-9]+[a-e]+)[\.0-9]*"$', metadata["head"], re.I)
+        m = re.match(r'^([0-9]+[a-e]+)[\.0-9]*$', metadata["head"], re.I)
         if m:
             metadata["head"] = m.group(1)
+
+        # first do the search with quotes around the head
+        metadata['head'] = '"%s"' % metadata['head']
+        hits = db.query(sort_order="", **metadata)
+
+        # Next, check to see if we have final greek-letter-section following a period (Hdt.), exclude final period
+        m = re.match(r'^("[1-9\.]+)\.([α-ω]+")$', metadata["head"], re.I)
+        if len(hits) == 0 and m:
+            metadata["head"] = m.group(1) + m.group(2)
+
+            # Try again
+            hits = db.query(sort_order="", **metadata)
 
         # Query just the text to see whether it is poetry and also grab the abbreviation
         metadata_nohead = metadata.copy()
@@ -187,6 +200,11 @@ def request_GetPassage(cts_config, config, request):
             if len(hits) == 0 and abbrev_head:
                 metadata_copy["head"] = abbrev_head
                 hits = db.query(sort_order="", **metadata_copy)
+
+        # if we still have no hits then search without quotes
+        if len(hits) == 0:
+            metadata['head'] = metadata['head'].strip('"')
+            hits = db.query(sort_order="", **metadata)
 
         #################################################################################
 
