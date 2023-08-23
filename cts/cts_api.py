@@ -104,8 +104,8 @@ def request_GetValidReff(cts_config, config, request):
 
     # get all heads for the text
     cursor = db.dbh.cursor()
-    #print(philo_id[:1], file=sys.stderr)
-    query = 'select * from toms where philo_id LIKE "{0}%" and head !="";'.format(philo_id[:1])
+    text_id = philo_id.split()[0]
+    query = 'select * from toms where philo_id LIKE "{0} %" and head !="";'.format(text_id)
     cursor.execute(query)
 
     requestcontent = ["GetValidReff", request["urn"]]
@@ -118,6 +118,7 @@ def request_GetValidReff(cts_config, config, request):
             if re.match(r'^' + cite + r'\..*$', row["head"]):
                 gvr += "<urn>%s:%s</urn>" % (urn, row["head"])
         else:
+            #print(row["head"], file=sys.stderr)
             gvr += "<urn>%s:%s</urn>" % (urn, row["head"])
 
     gvr += "</reff></reply></GetValidReff>"
