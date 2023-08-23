@@ -110,7 +110,6 @@ def get_cite_from_urn(urn):
             urn_match = re.match(r'(urn:cts:\w+:\w+\.\w+):*([0-9\.a-eα-ω]+)*', urn, re.I)
             urn = urn_match.group(1)
             cite = urn_match.group(2)
-            print(urn_match.group(2), file=sys.stderr)
         except Exception as e:
             # not a valid urn
             return (False, False)
