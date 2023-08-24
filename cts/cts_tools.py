@@ -55,10 +55,10 @@ def parse_request(request):
     return parsed_request
 
 def validate_request(request):
-    valid_requests = ["GetCapabilities", "GetValidReff", "GetPassage"]
+    valid_requests = ["GetCapabilities", "GetValidReff", "GetPassage", "GetFirstUrn"]
     valid_params = ["request", "urn", "level", "context"]
 
-    required_params = {"GetCapabilities": [], "GetValidReff": ["urn"], "GetPassage": ["urn"]}
+    required_params = {"GetCapabilities": [], "GetValidReff": ["urn"], "GetPassage": ["urn"], "GetFirstUrn": ["urn"]}
 
     if not isinstance(request, dict):
         return 1
