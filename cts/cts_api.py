@@ -246,7 +246,7 @@ def request_GetPassage(cts_config, config, request):
             # so that we know what levels above it to wrap around
             # the fetched xml
             div_type = hit["type"]
-
+            #div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
             # create the div wrapper
             for div in cts_divs:
                 if div_type.lower() == div: break
@@ -272,6 +272,72 @@ def request_GetPassage(cts_config, config, request):
     ##get philo_id for text urn
     #for t in text: philo_id = t["philo_id"]
 
+def request_GetFirstUrn(cts_config, config, request):
+    db = DB(config.db_path + "/data/")
+    (urn, cite) = get_cite_from_urn(request["urn"])
+
+    if cite:
+        # remove the lowest level of the cite so that we can find the first urn
+        if "." in cite: cite = '.'.join(cite.split('.')[:-1])
+
+    metadata = {"cts_urn": urn}
+    text = db.query(sort_order="", **metadata)
+    
+    #get philo_id for text urn
+    philo_id = ""
+    for t in text: philo_id = t["philo_id"]
+    if not philo_id: return (3, "Unknown urn")
+
+    #get cts_divs so we only match appropriate heads
+    valid_types = get_cts_divs(t)
+
+    # get the first head for the text
+    cursor = db.dbh.cursor()
+    text_id = philo_id.split()[0]
+    query = 'select * from toms where philo_id LIKE "{0} %" and head !="";'.format(text_id)
+    cursor.execute(query)
+
+    requestcontent = ["GetFirstUrn", request["urn"]]
+    gfu = "<GetFirstUrn>%s<reply><reff>" % (XML_builder(xmlrequest, requestcontent))
+
+    found_passage = False
+    for row in cursor.fetchall():
+    
+        # Get the row type or subtype 
+        try:
+            div_type = row["type"].lower()
+        except Exception as e:
+            div_type = ""
+
+        try:
+            div_subtype = row["subtype"].lower()
+        except Exception as e:
+            div_subtype = ""
+
+        # if either the type or subtype is valid (from the refsDecl), then pass, otherwise skip
+        if any([x for x in valid_types if div_type == x]): pass
+        elif any([x for x in valid_types if div_subtype == x]): pass
+        else: continue
+
+        #print(row["head"], file=sys.stderr)
+        # check if a passage was included in the request, in which case, limit the responses to only that level
+        if cite:
+
+            if re.match(r'^' + cite + r'\..*$', row["head"]):
+                print(row["head"], file=sys.stderr)
+                found_passage = True
+                gfu += "<urn>%s:%s</urn>" % (urn, row["head"])
+        else:
+            #print(gfu, file=sys.stderr)
+            found_passage = True
+            gfu += "<urn>%s:%s</urn>" % (urn, row["head"])
+
+        # if we've found something, then break
+        if found_passage: break
+
+    gfu += "</reff></reply></GetFirstUrn>"
+
+    return (0, gfu)
 
 def cts_results(request, cts_config, config):
     request = parse_request(request)
