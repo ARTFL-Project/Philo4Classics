@@ -249,7 +249,7 @@ def request_GetPassage(cts_config, config, request):
             div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
             # create the div wrapper
             for div in cts_divs:
-                if div_type == div: break
+                if div_type.lower() == div: break
                 div_wrapper = '<tei:div type="%s">' % (div) + div_wrapper + '</tei:div>'
 
             if hit["head"].startswith(cite) and hit["cts_urn"] == urn:
