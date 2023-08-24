@@ -1028,7 +1028,8 @@ class XMLParser:
                         self.v["div1"]["type"] = "chapter"
                     self.open_div1 = True
                     self.open_chapter = True
-            elif milestone_section_tag.search(tag) and not self.got_a_div2:
+            #elif milestone_section_tag.search(tag) and not self.got_a_div2:
+            elif milestone_section_tag.search(tag):
                 if self.open_chapter and self.got_a_milestone:
                     #print(self.got_a_div, file=sys.stderr)
                     if self.open_div3:  # account for unclosed milestone tags
