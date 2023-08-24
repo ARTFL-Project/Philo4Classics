@@ -246,10 +246,18 @@ def request_GetPassage(cts_config, config, request):
             # so that we know what levels above it to wrap around
             # the fetched xml
             div_type = hit["type"]
-            #div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
+
             # create the div wrapper
+            # reverse the order of the cts_divs because the wrapper is built inside-out
+            cts_divs.reverse()
             for div in cts_divs:
-                if div_type.lower() == div: break
+
+                # don't wrap higher level divs with lower level divs
+                if cts_divs.index(div) < cts_divs.index(div_type): continue
+
+                # if your hit is at its own level, skip the wrapper
+                if div_type.lower() == div: continue
+
                 div_wrapper = '<tei:div type="%s">' % (div) + div_wrapper + '</tei:div>'
 
             if hit["head"].startswith(cite) and hit["cts_urn"] == urn:
@@ -319,16 +327,13 @@ def request_GetFirstUrn(cts_config, config, request):
         elif any([x for x in valid_types if div_subtype == x]): pass
         else: continue
 
-        #print(row["head"], file=sys.stderr)
         # check if a passage was included in the request, in which case, limit the responses to only that level
         if cite:
 
             if re.match(r'^' + cite + r'\..*$', row["head"]):
-                print(row["head"], file=sys.stderr)
                 found_passage = True
                 gfu += "<urn>%s:%s</urn>" % (urn, row["head"])
         else:
-            #print(gfu, file=sys.stderr)
             found_passage = True
             gfu += "<urn>%s:%s</urn>" % (urn, row["head"])
 
