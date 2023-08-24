@@ -246,7 +246,7 @@ def request_GetPassage(cts_config, config, request):
             # so that we know what levels above it to wrap around
             # the fetched xml
             div_type = hit["type"]
-            div_wrapper = '<tei:div type="%s">' % (div_type) + div_wrapper + '</tei:div>'
+
             # create the div wrapper
             for div in cts_divs:
                 if div_type.lower() == div: break
