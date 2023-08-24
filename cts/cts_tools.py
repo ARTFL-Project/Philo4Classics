@@ -14,21 +14,37 @@ def XML_validate(xmlcontent, fix=False):
             return XML_response(e)
         else:
             if "mismatched tag" in str(e):
-                tag_minder = {}
-                tags = re.findall(r'<.*?>', xmlcontent)
-                for tag in tags:
+                tag_minder =[] 
+                for tag_obj in re.finditer(r'<.*?>', xmlcontent):
+                    tag = tag_obj.group(0)
                     if not re.match(r'^.*?/>', tag, re.M):
-                        tag_name = re.match(r'</*(.*?)[ >]', tag).group(1)
-                        if tag_name in tag_minder: tag_minder[tag_name] += 1
-                        else: tag_minder[tag_name] = 1
-                for k,v in tag_minder.items():
-                    if not (v % 2) == 0:
-                        error_lineno = int(getattr(e, 'lineno', repr(e)))
-                        print ("Tag %s is mismatched on line %s!" % (k, error_lineno), file=sys.stderr)
-                        lines = xmlcontent.split("\n")
-                        lines[error_lineno - 1] = re.sub(r'<.*?' + k + '.*?>', '', lines[error_lineno - 1])
-                        xmlcontent = '\n'.join(lines)
-                        return xmlcontent
+                        m = re.match(r'<([^/]*?)[ >]', tag)
+                        if m:
+                            tag_minder.append(m.group(1))
+                        m = re.match(r'</(.*?)[ >]', tag)
+                        if m:
+                            if tag_minder[-1] == m.group(1):
+                                tag_minder.pop()
+                                pass
+                            else:
+                                # We have a tag mismatch; determine whether we are missing an opening tag or a closing tag
+                                if any(x for x in tag_minder if m.group(1) == x):
+                                    # add the missing closing tag and pop its opening tag
+                                    tag_to_add =  "</" + tag_minder.pop() + ">"
+                                    xmlcontent1 = xmlcontent[:tag_obj.start() - len(tag_to_add)] + tag_to_add + xmlcontent[tag_obj.start() - len(tag_to_add):] 
+                                    xmlcontent2 = xmlcontent[:tag_obj.start()] + tag_to_add + xmlcontent[tag_obj.start():] 
+                                    try:
+                                       dom = xml.dom.minidom.parseString(xmlcontent1) # or xml.dom.minidom.parseString(xml_string)
+                                       xmlcontent = xmlcontent1
+                                    except Exception as e: 
+                                       xmlcontent = xmlcontent2
+                                    # don't forget to pop the legitimate closing tag
+                                    tag_minder.pop()
+                                else:
+                                    # remove the extraneous closing tag
+                                    xmlcontent = xmlcontent[:tag_obj.start()] + xmlcontent[tag_obj.end():] 
+              
+                return xmlcontent
 
 def parse_request(request):
     parsed_request = {}
