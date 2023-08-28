@@ -2140,10 +2140,13 @@ if (f):
 \n                urn = perseus_to_cts_urn(el.attrib["n"])\
 \n                (urn, cite) = get_cite_from_urn(urn)\
 \n                if urn and cite:\
-\n                    if "greek" in urn: text_load = config.Greek_dbname\
-\n                    if "latin" in urn: text_load = config.Latin_dbname\
-\n                    el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
-\n                    el.attrib["target"] = "_blank"'      
+\n                    try:\
+\n                        if "greek" in urn: text_load = config.Greek_dbname\
+\n                        if "latin" in urn: text_load = config.Latin_dbname\
+\n                        el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
+\n                        el.attrib["target"] = "_blank"\
+\n                    except Exception as e:\
+\n                        pass'
         new_f = re.sub(r'(\s*)(elif el.tag == "title":)', r'\1#fix_load was here\1' + content + r'\1\2', new_f, flags=re.S)
         show.progress()
         ObjectFormatter_py = re.sub(re.escape(f), new_f, ObjectFormatter_py, flags=re.S)
@@ -2169,10 +2172,13 @@ if (f):
 \n                    urn = perseus_to_cts_urn(el.attrib["n"])\
 \n                    (urn, cite) = get_cite_from_urn(urn)\
 \n                    if urn and cite:\
-\n                        if "greek" in urn: text_load = config.Greek_dbname\
-\n                        if "latin" in urn: text_load = config.Latin_dbname\
-\n                        el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
-\n                        el.attrib["target"] = "_blank"'      
+\n                        try:\
+\n                            if "greek" in urn: text_load = config.Greek_dbname\
+\n                            if "latin" in urn: text_load = config.Latin_dbname\
+\n                            el.attrib["href"] = text_load + \'query?report=bibliography&method=proxy&cts_urn=%s&head=%s\' % (urn, cite)\
+\n                            el.attrib["target"] = "_blank"\
+\n                        except Exception as e:\
+\n                            pass'
         new_f = re.sub(r'(\s*)(elif el.tag == "head":)', r'\1#fix_load was here\1' + content + r'\1\2', f, flags=re.S)
         show.progress()
         ObjectFormatter_py = re.sub(re.escape(f), new_f, ObjectFormatter_py, flags=re.S)
