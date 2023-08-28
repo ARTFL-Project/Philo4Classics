@@ -275,7 +275,7 @@ def request_GetPassage(cts_config, config, request):
                 return (0, gp)
         return (3, "Invalid passage references or urn")
     else:
-        return (3, "No Passage Specified")
+        return (1, "No Passage Specified")
 
     ##get philo_id for text urn
     #for t in text: philo_id = t["philo_id"]
@@ -306,7 +306,7 @@ def request_GetFirstUrn(cts_config, config, request):
     cursor.execute(query)
 
     requestcontent = ["GetFirstUrn", request["urn"]]
-    gfu = "<GetFirstUrn>%s<reply><reff>" % (XML_builder(xmlrequest, requestcontent))
+    gfu = "<GetFirstUrn>%s<reply>" % (XML_builder(xmlrequest, requestcontent))
 
     found_passage = False
     for row in cursor.fetchall():
@@ -340,9 +340,76 @@ def request_GetFirstUrn(cts_config, config, request):
         # if we've found something, then break
         if found_passage: break
 
-    gfu += "</reff></reply></GetFirstUrn>"
+    gfu += "</reply></GetFirstUrn>"
 
     return (0, gfu)
+
+def request_GetPrevNextUrn(cts_config, config, request):
+
+    db = DB(config.db_path + "/data/")
+    (urn, cite) = get_cite_from_urn(request["urn"])
+
+    if cite:
+        requestcontent = ["GetPrevNextUrn", request["urn"]]
+
+        metadata = {"cts_urn": urn, "head": cite}
+        hits = db.query(sort_order="", **metadata)
+        if len(hits) != 1: return (3, "Invalid passage references or urn")
+
+        # get the philo_id of the prev and next passage
+        (prev_id, next_id) = ("","")
+        for hit in hits:
+            prev_id = ' '.join(hit["prev"].split()[:7])
+            next_id = ' '.join(hit["next"].split()[:7])
+        if not prev_id and not next_id: return (3, "Invalid passage references or urn")
+
+        cursor = db.dbh.cursor()
+        (prev_cite, next_cite) = ("","")
+
+        # get the previous head
+        while not prev_cite:
+            query = 'select * from toms where philo_id="%s";' % prev_id
+            cursor.execute(query)
+            hit = cursor.fetchone()
+
+            #print(prev_id, file=sys.stderr)
+            if hit["head"]:
+                print(hit["head"], file=sys.stderr)
+                prev_cite = "%s:%s" % (urn, hit["head"])
+            else:
+                if hit["prev"]:
+                    #print(hit["prev"], file=sys.stderr)
+                    query = 'select * from toms where philo_id = "%s";' % hit["prev"]
+                    cursor.execute(query)
+                    hit = cursor.fetchone()
+                else:
+                    break
+
+        # get the next head
+        while not next_cite:
+            query = 'select * from toms where philo_id="%s";' % next_id
+            cursor.execute(query)
+            hit = cursor.fetchone()
+
+            if hit["head"]:
+                next_cite = "%s:%s" % (urn, hit["head"])
+            else:
+                if hit["next"]:
+                    query = 'select * from toms where philo_id = "%s";' % hit["next"]
+                    cursor.execute(query)
+                    hit = cursor.fetchone()
+                else:
+                    break
+
+        gpnu = "<GetPrevNextUrn>%s<reply><prevnext>" % (XML_builder(xmlrequest, requestcontent))
+
+        gpnu += "<prev><urn>%s</urn></prev><next><urn>%s</urn></next>" % (prev_cite, next_cite)
+        gpnu += "</prevnext></reply></GetPrevNextUrn>"
+
+        return (0, gpnu)
+
+    else:
+        return(1, "No Passage Specified")
 
 def cts_results(request, cts_config, config):
     request = parse_request(request)
