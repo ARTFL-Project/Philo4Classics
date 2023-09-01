@@ -2209,7 +2209,7 @@ if (f):
     if 'fix_load' not in f:
         new_f = re.sub(r"^( *)(.*)", r"#\1\2 #fix_load", f, flags=re.M) 
         content = '\
-\n    allowed_tags = set(["head", "item", "quote", "p", "div", "foreign", "milestone", "note", "span", "philoHighlight", "w", "author", "i", "title", "itype", "tns", "gen", "bibl", "orth", "pron", "abbr", "sense", "gramGrp", "gram", "q", "sp", "cit", "date", "placeName", "etym", "pos", "l", "ref", "gap", "name"])\
+\n    allowed_tags = set(["head", "item", "quote", "p", "div", "foreign", "milestone", "note", "span", "philoHighlight", "w", "author", "i", "title", "itype", "tns", "gen", "bibl", "orth", "pron", "abbr", "sense", "gramGrp", "gram", "q", "sp", "cit", "date", "placeName", "etym", "pos", "l", "ref", "gap", "name", "hi", "stage", "rs"])\
 \n    found_highlight = False\
 \n    for el in xml.iter():\
 \n        orig_tag = el.tag\
