@@ -5,6 +5,14 @@ import sys
 import json
 
 def XML_validate(xmlcontent, fix=False):
+
+    have_bs4 = False
+    try:
+        from bs4 import BeautifulSoup
+        have_bs4 = True
+    except ImportError:
+        pass
+    
     import xml.dom.minidom
     try:
         dom = xml.dom.minidom.parseString(xmlcontent) # or xml.dom.minidom.parseString(xml_string)
@@ -12,6 +20,10 @@ def XML_validate(xmlcontent, fix=False):
     except Exception as e:
         if not fix:
             return XML_response(e)
+        elif have_bs4:
+            xmlcontent = str(BeautifulSoup(xmlcontent,'xml'))
+            xmlcontent = re.sub(r'<\?xml version.*?>', '', xmlcontent, flags=re.S)
+            return xmlcontent
         else:
             if "mismatched tag" in str(e):
                 tag_minder =[] 
