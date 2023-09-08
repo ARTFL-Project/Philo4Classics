@@ -271,7 +271,7 @@ refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *(\w+=".*?")* *(\w+=".*?")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* *(\w+=".*?")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
-refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* *((unit|n)=".*?")* */>', re.I)
+refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* *(\w+=".*?")* *((unit|n)=".*?")* */?>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
 
@@ -563,6 +563,7 @@ class XMLParser:
 
         # CTS and refsDecl stuff (WMS)
         self.in_refsDecl = False
+        self.have_CTS_refsDecl = False
         self.refStates = {}
         self.refState_level = 0
 
@@ -690,10 +691,11 @@ class XMLParser:
         self.content = self.content.replace("<", "\n<").replace(">", ">\n")
 
     def header_handler(self, tag):
-        if refsDecl_open_tag.search(tag):
+        if refsDecl_open_tag.search(tag) and not self.have_CTS_refsDecl:
             self.in_refsDecl = True
             self.refStates = {}
             self.refState_level = 0
+            if "CTS" in tag: self.have_CTS_refsDecl = True
         elif refsDecl_close_tag.search(tag):
             self.in_refsDecl = False
 
