@@ -273,7 +273,7 @@ refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
 refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* *(\w+=".*?")* *((unit|n)=".*?")* */?>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
-div_tag_cts = re.compile(r'<div (\w+="\w+")* (\w+="\w+")* (.*?=".*?")* (.*?=".*?")*', re.I)
+div_tag_cts = re.compile(r'<div (\w+="\w+")*\s*(\w+="\w+")*\s*(.*?=".*?")*\s*(.*?=".*?")*\s*/?>', re.I)
 
 ## Build a list of control characters to remove
 ## http://stackoverflow.com/questions/92438/stripping-non-printable-characters-from-a-string-in-python/93029#93029
@@ -1249,14 +1249,22 @@ class XMLParser:
             elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag) and not div_dsection_tag.search(tag)) and not div_chapter_tag.search(tag):
                 # if we have refStates, then use those to determine level, otherwise increment arbitrarily
                 self.found_cts_level = False
-                if div_tag_cts.search(tag):
+
+                # clean out whitespace from deranged multiline tags
+                clean_tag = ' '.join(tag.split())
+
+                if div_tag_cts.search(clean_tag):
                     for i in range(2,5):
-                        if "subtype" in div_tag_cts.search(tag).group(i):
-                            (k,v) = div_tag_cts.search(tag).group(i).split("=")
-                            v = v.strip('"')
-                            if v in self.refStates:
-                                self.context_div_level = self.refStates[v]["level"]
-                                self.found_cts_level = True
+                        try:
+                            if div_tag_cts.search(clean_tag).group(i):
+                                if "subtype" in div_tag_cts.search(clean_tag).group(i):
+                                    (k,v) = div_tag_cts.search(clean_tag).group(i).split("=")
+                                    v = v.strip('"')
+                                    if v in self.refStates:
+                                        self.context_div_level = self.refStates[v]["level"]
+                                        self.found_cts_level = True
+                        except Exception as e:
+                           print("div_tag_cts exception: %s %s %s" % (e, tag, clean_tag))
                 if not self.found_cts_level:
                     self.context_div_level += 1
 
