@@ -728,7 +728,7 @@ class XMLParser:
                                 if v not in self.refStates.keys() and v != "chunk":
                                     self.refState_level += 1
                                     self.refStates[v] = {"level": self.refState_level}
-                print(self.refStates) 
+                #print(self.refStates) 
 
     def tag_handler(self, tag):
         """Tag handler for parser."""
