@@ -272,6 +272,7 @@ refsDecl_close_tag = re.compile(r"</refsDecl>", re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* ((unit|n)=".*?")* *((unit|n)=".*?")* *((unit|n)=".*?")* *(\w+=".*?")* */>', re.I)
 #refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* */>', re.I)
 refState_tag = re.compile(r'<(cRefPattern|refState|state|step) (\w+=".*?")* *((unit|n)=".*?")+ *(\w+=".*?")* *(\w+=".*?")* *((unit|n)=".*?")* */?>', re.I)
+CTSrefState_tag = re.compile(r'<cRefPattern\s*((unit|n)=".*?")+\s*(matchPattern=".*?")+\s*(replacementPattern=".*?")+\s*[\w ]*/?>', re.I)
 #cFefPattern_tag = re.compile(r'<cRefPattern (\w+=".*?") *(\w+=".*?") (\w+=".*?") */>', re.I)
 div_tag_cts = re.compile(r'<div (\w+="\w+")*\s*(\w+="\w+")*\s*(.*?=".*?")*\s*(.*?=".*?")*\s*/?>', re.I)
 
@@ -700,11 +701,22 @@ class XMLParser:
             self.in_refsDecl = False
 
         if self.in_refsDecl:
-            m = refState_tag.search(tag)
+            m = CTSrefState_tag.search(tag) or refState_tag.search(tag)
             if m:
                 #print(m.group(0))
                 #if "chunk" not in m.group(0) or "bekker" in m.group(0):
-                if "chunk" not in m.group(0) or self.using_Bekker:
+                if "matchPattern" in m.group(0):
+                    stateline = m.group(1).split("=")
+                    statek = stateline[0]
+                    statev = ''.join(stateline[1:]).strip('"')
+                    
+                    matchline = m.group(3).split("=")
+                    matchk = matchline[0]
+                    matchv = ''.join(matchline[1:]).strip('"')
+                    self.refState_level = len(matchv.split('.'))
+                    self.refStates[statev] = {"level": self.refState_level}
+
+                elif "chunk" not in m.group(0) or self.using_Bekker:
                     for i in range(2,6):
                         # find the "unit" so we can use it as the key
                         if m.group(i):
@@ -716,7 +728,7 @@ class XMLParser:
                                 if v not in self.refStates.keys() and v != "chunk":
                                     self.refState_level += 1
                                     self.refStates[v] = {"level": self.refState_level}
-                #print(self.refStates) 
+                print(self.refStates) 
 
     def tag_handler(self, tag):
         """Tag handler for parser."""
