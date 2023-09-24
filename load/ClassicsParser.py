@@ -714,7 +714,10 @@ class XMLParser:
                     matchk = matchline[0]
                     matchv = ''.join(matchline[1:]).strip('"')
                     self.refState_level = len(matchv.split('.'))
-                    self.refStates[statev] = {"level": self.refState_level}
+                    if statev not in self.refStates.keys() and self.refState_level not in [x['level'] for x in self.refStates.values()]:
+                        self.refStates[statev] = {"level": self.refState_level}
+                    else:
+                        print("***Consistency error detected in refsDecl.***")
 
                 elif "chunk" not in m.group(0) or self.using_Bekker:
                     for i in range(2,6):

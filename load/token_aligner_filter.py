@@ -74,18 +74,21 @@ def concat_milestones(loader,text):
 
             for i in range(1, len(cts_divs) + 1):
                 #print("type: %s, cts_div: %s, range: %s" % (record_type, cts_divs["cts_div%s" % i], i), file=sys.stderr)
-                if (record_type == cts_divs["cts_div%s" % i] or record_subtype == cts_divs["cts_div%s" % i]) and record_head:
+                try:
+                    if (record_type == cts_divs["cts_div%s" % i] or record_subtype == cts_divs["cts_div%s" % i]) and record_head:
 
-                    # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
-                    for j in range(i + 1, len(cts_divs) + 1):
-                        if "cts_div%s" % j in cts_div_heads: del cts_div_heads["cts_div%s" % j]
+                        # delete divs under currently changed one (for when we open new poem, chapter, book, etc)
+                        for j in range(i + 1, len(cts_divs) + 1):
+                            if "cts_div%s" % j in cts_div_heads: del cts_div_heads["cts_div%s" % j]
 
-                    # building head strictly based on refsDecl
-                    cts_div_heads["cts_div%s" % i] = record_head
-                    #print(cts_div_heads)
-                    heads = cts_div_heads.values()
-                    record.attrib["head"] = '.'.join(filter(None, heads))
-                    break
+                        # building head strictly based on refsDecl
+                        cts_div_heads["cts_div%s" % i] = record_head
+                        #print(cts_div_heads)
+                        heads = cts_div_heads.values()
+                        record.attrib["head"] = '.'.join(filter(None, heads))
+                        break
+                except Exception as e:
+                    print('Incomplete resfDecl. "cts_div%s" is missing. Unable to build head (%s)' % (i, record_head))
         
         elif type == "div1":
             if "n" in record.attrib:
