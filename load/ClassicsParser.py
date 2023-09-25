@@ -1010,7 +1010,7 @@ class XMLParser:
                 self.v["div2"]["type"] = "scene"
                 self.open_div2 = True
             elif div_chapter_tag.search(tag):
-                if self.got_a_div2 and self.got_a_milestone:
+                if (self.got_a_div2 and self.got_a_milestone) or self.got_a_div:
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)

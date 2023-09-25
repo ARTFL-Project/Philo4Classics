@@ -88,7 +88,7 @@ def concat_milestones(loader,text):
                         record.attrib["head"] = '.'.join(filter(None, heads))
                         break
                 except Exception as e:
-                    print('Incomplete resfDecl. "cts_div%s" is missing. Unable to build head (%s)' % (i, record_head))
+                    print('Incomplete refsDecl. "cts_div%s" is missing. Unable to build head (%s)' % (i, record_head))
         
         elif type == "div1":
             if "n" in record.attrib:
