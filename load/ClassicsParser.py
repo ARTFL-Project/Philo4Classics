@@ -262,7 +262,7 @@ line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
 milestone_line_tag = re.compile(r'<milestone.*line', re.I)
 div_card_tag = re.compile(r'<div.*card', re.I)
 div_dsection_tag = re.compile(r'<div.*\"(dsection|dchapter)', re.I)
-div_chapter_tag = re.compile(r'<div.*\"(chapter|cap)', re.I)
+div_chapter_tag = re.compile(r'<div.*\"(chapter|cap|pr)', re.I)
 
 # CTS and refsDecl stuff (WMS)
 refsDecl_open_tag = re.compile(r"<refsDecl.*?>", re.I)
