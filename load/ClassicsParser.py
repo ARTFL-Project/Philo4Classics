@@ -1014,6 +1014,7 @@ class XMLParser:
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
+                        self.open_chapter = False
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
                     self.v["div2"]["type"] = "chapter"
@@ -1027,6 +1028,7 @@ class XMLParser:
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
+                        self.open_chapter = False
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
                     if milestone_poem_tag.search(tag):
@@ -1044,6 +1046,7 @@ class XMLParser:
                     if self.open_div1:  # account for unclosed milestone tags
                         div1_end_byte = self.bytes_read_in - len(tag)
                         self.close_div1(div1_end_byte)
+                        self.open_chapter = False
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
                     if milestone_poem_tag.search(tag):
@@ -1063,6 +1066,7 @@ class XMLParser:
                     if self.open_div3:  # account for unclosed milestone tags
                         div3_end_byte = self.bytes_read_in - len(tag)
                         self.close_div3(div3_end_byte)
+                        self.open_section = False
                     self.v.push("div3", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div3")
                     if self.using_Bekker:
@@ -1077,6 +1081,7 @@ class XMLParser:
                     if self.open_div2:  # account for unclosed milestone tags
                         div2_end_byte = self.bytes_read_in - len(tag)
                         self.close_div2(div2_end_byte)
+                        self.open_section = False
                     self.v.push("div2", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div2")
                     if self.using_Bekker:
@@ -1091,6 +1096,7 @@ class XMLParser:
                     if self.open_div1:  # account for unclosed milestone tags
                         div1_end_byte = self.bytes_read_in - len(tag)
                         self.close_div1(div1_end_byte)
+                        self.open_section = False
                     self.v.push("div1", tag_name, start_byte)
                     self.get_object_attributes(tag, tag_name, "div1")
                     if self.using_Bekker:
