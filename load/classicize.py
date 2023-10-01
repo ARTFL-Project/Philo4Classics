@@ -678,7 +678,7 @@ if (f) and type_of_fix != "dictionary":
 
 # fix search example to conform with metadata limits
 if type_of_fix != "dictionary":
-    f = regexmatch(r'[^ ]search_examples = \{.*?\'(urn:.*?)\'.*?\}', web_config, re.S)
+    f = regexmatch(r'[^ ]search_examples = \{.*?\'(urn:.*?)\'.*?\}', web_config, re.S, critical=False)
     if(f):
         xmlbase = f.group(1)
         f = f.group()
