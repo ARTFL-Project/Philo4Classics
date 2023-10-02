@@ -262,6 +262,7 @@ line_n_tag = re.compile(r'<l n="[0-9]+[a-e]*".*?', re.I)
 milestone_line_tag = re.compile(r'<milestone.*line', re.I)
 div_card_tag = re.compile(r'<div.*card', re.I)
 div_dsection_tag = re.compile(r'<div.*\"(dsection|dchapter)', re.I)
+div_section_tag = re.compile(r'<div.*\"section', re.I)
 div_chapter_tag = re.compile(r'<div.*\"(chapter|cap|pr)', re.I)
 
 # CTS and refsDecl stuff (WMS)
@@ -1020,6 +1021,17 @@ class XMLParser:
                     self.v["div2"]["type"] = "chapter"
                     self.open_div2 = True
                     self.open_chapter = True
+            elif div_section_tag.search(tag):
+                if (self.got_a_div2 and self.got_a_milestone) or self.got_a_div:
+                    if self.open_div3:  # account for unclosed milestone tags
+                        div3_end_byte = self.bytes_read_in - len(tag)
+                        self.close_div3(div3_end_byte)
+                        self.open_section = False
+                    self.v.push("div3", tag_name, start_byte)
+                    self.get_object_attributes(tag, tag_name, "div3")
+                    self.v["div3"]["type"] = "section"
+                    self.open_div3 = True
+                    self.open_section = True
 #            elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_card_tag.search(tag) or milestone_chapter_tag.search(tag):
             #elif milestone_Bekker_tag.search(tag) or milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
             elif milestone_bekker_tag.search(tag) or milestone_poem_tag.search(tag) or milestone_chapter_tag.search(tag):
@@ -1267,7 +1279,7 @@ class XMLParser:
                 self.context_div_level -= 1
                 self.no_deeper_objects = False
             #elif (div_tag.search(tag) and not self.is_drama and not div_edition_tag.search(tag)):
-            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag) and not div_dsection_tag.search(tag)) and not div_chapter_tag.search(tag):
+            elif (div_tag.search(tag) and (not self.is_drama or (self.is_drama and not self.using_cards)) and not div_edition_tag.search(tag) and not div_translation_tag.search(tag) and not div_card_tag.search(tag) and not div_dsection_tag.search(tag)) and not div_chapter_tag.search(tag) and not div_chapter_tag.search(tag) and not div_section_tag.search(tag):
                 # if we have refStates, then use those to determine level, otherwise increment arbitrarily
                 self.found_cts_level = False
 
