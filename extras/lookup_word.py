@@ -299,13 +299,16 @@ def lookup_word_by_id(db, cursor, token, n, word_id):
     except Exception as e:
         print(str(e) + " on line " + str(e.__traceback__.tb_lineno), file=sys.stderr)
 
-    # check if 'user' cookie is set to determine whether to construct the morph_url
-    cookies = os.environ['HTTP_COOKIE']
-    cookies = cookies.split(';')
-    #print(cookies, file=sys.stderr)
-    morph_url = ""
-    if any("user" in var for var in cookies):
-        morph_url = "https://anastrophe.uchicago.edu/cgi-bin/perseus/morph.pl?id=%s&&lang=%s" % (tokenid, morph_lang)
+    try:
+        # check if 'user' cookie is set to determine whether to construct the morph_url
+        cookies = os.environ['HTTP_COOKIE']
+        cookies = cookies.split(';')
+        #print(cookies, file=sys.stderr)
+        morph_url = ""
+        if any("user" in var for var in cookies):
+            morph_url = "https://anastrophe.uchicago.edu/cgi-bin/perseus/morph.pl?id=%s&&lang=%s" % (tokenid, morph_lang)
+    except Exception as e:
+        morph_url = ""
 
     result_object = {
         'properties': [{"property": "Definition",
