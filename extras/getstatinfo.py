@@ -317,19 +317,23 @@ if stats == "lemmas" or stats == "all":
         infoconn = sqlite3.connect(infodb)
         infocursor = infoconn.cursor()
         infocursor.execute('delete from frequencies')
-        print("finished")
+        eprint("finished")
         eprint("[Writing]     lemma ranks to [%s]..." % infodb, end="", flush=True)
         for (lemma, rank, count, rate) in lemmas_ranked:
             infocursor.execute('insert into frequencies values (?,?,?,?,?)', (lemma, rank, count, str(round(rate, 3)), lemma.rstrip(string.digits)))
             sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (1, rank))
+        sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (3, '...finished'))
+        eprint("finished")
+        eprint("[Rebuilding]  f_l index...", end="", flush=True)
+        infocursor.execute('drop index if exists f_l')
+        infocursor.execute('CREATE INDEX f_l on frequencies(lookupform)')
+        eprint("finished")
         infoconn.commit()
         infoconn.close()
-        sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (3, '...finished'))
-
+        
     elif out in ["text"]:
         for (lemma, rank, count, rate) in lemmas_ranked:
             print("%s\t%s\t%d\t%.3f\t%s" % (lemma, rank, count, rate, lemma.rstrip(string.digits)))
-
     eprint("")
 
 if stats == "lemmas_by_author" or stats == "all":
@@ -353,13 +357,18 @@ if stats == "lemmas_by_author" or stats == "all":
         eprint("[Writing]     lemma ranks by author to [%s]..." % infodb, end="", flush=True)
         for (lemma, rank, percentage, count, author) in lemmas_by_author:
             infocursor.execute('insert into authorFreqs values (?,?,?,?)', (lemma, rank, author, f'{percentage:.10f}'))
+        eprint("finished")
+        eprint("[Rebuilding   aF_l index...", end="", flush=True)
+        infocursor.execute('drop index if exists aF_l')
+        infocursor.execute('CREATE INDEX aF_l on authorFreqs(lemma)')
+        eprint("finished")
         infoconn.commit()
         infoconn.close()
-        eprint("finished")
 
     elif out in ["text"]:
         for (lemma, rank, percentage, count, author) in lemmas_by_author:
             print("%s\t%d\t%s\t%f\t%d" % (lemma, rank, author, percentage, count))
+    eprint("")
 
 if stats == "collocations" or stats == "all":
     # Collocations
@@ -383,10 +392,15 @@ if stats == "collocations" or stats == "all":
         eprint("[Writing]     collocations to [%s]..." % infodb, end="", flush=True)
         for (lemma, collocate, count) in collocations:
             infocursor.execute('insert into collocations values (?,?,?,?)', (lemma, collocate, count, lemma.rstrip(string.digits)))
+        eprint("finished")
+        eprint("[Rebuilding]  c_l index...", end="", flush=True)
+        infocursor.execute('drop index if exists c_l')
+        infocursor.execute('CREATE INDEX c_l on collocations(lookupform)')
+        eprint("finished")
         infoconn.commit()
         infoconn.close()
-        eprint("finished")
 
     elif out in ["text"]:
         for (lemma, collocate, count) in collocations:
             print("%s\t%s\t%d\t%s" % (lemma, collocate, count, lemma.rstrip(string.digits)))
+    eprint("")
