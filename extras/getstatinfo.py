@@ -55,7 +55,7 @@ def user_setpath(question, default_choice="", path_suffix=""):
 
 def lump_texts(author):
 
-    NT = ['Mark', 'Matthew', 'Luke', 'John', 'Acts', 'Romans', 'I Corinthians', 'II Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', 'I Thessalonians', 'II Thessalonians', 'I Timothy', 'II Timothy', 'Philemon', 'Hebrews', 'James', 'I Peter', 'II Peter', 'I John', 'II John', 'III John', 'Jude', 'Revelation']
+    NT = ['Mark', 'Matthew', 'Luke', 'John', 'Acts', 'Romans', 'I Corinthians', 'II Corinthians', 'Galatians', 'Ephesians', 'Philippians', 'Colossians', 'I Thessalonians', 'II Thessalonians', 'I Timothy', 'II Timothy', 'Titus', 'Philemon', 'Hebrews', 'James', 'I Peter', 'II Peter', 'I John', 'II John', 'III John', 'Jude', 'Revelation']
 
     if author in NT: author = "NT"
     if "HH" in author: author = "HH"
@@ -89,7 +89,7 @@ def get_lemma_ranks(cursor, cutoff=50):
     lemmas_ranked = []
     total_count_base = sum(set(j for i, j in lemmas_sorted)) / 10000.0 # (?) Taken from create_frequencies.py in old_scripts/
     for lemma in lemmas_sorted:
-        if lemma in forbidden_lemmas: continue
+        if lemma[0] in forbidden_lemmas: continue
         if lemma[1] < cutoff: continue
         if lemma[1] != prev_count:
             rank = nominal_rank
@@ -125,7 +125,7 @@ def get_collocations(cursor, tomsdb, lemmas_ranked, cutoff=6000, filter_frequenc
         #request.metadata = {'author': 'Aeschylus'}
         request.metadata = {}
         request['report'] = 'collocation'
-        request['q'] = lemma
+        request['q'] = '"' + lemma + '"'
         #request['author'] = 'Aeschylus'
         request['author'] = ''
         request['start'] = 0
@@ -142,6 +142,7 @@ def get_collocations(cursor, tomsdb, lemmas_ranked, cutoff=6000, filter_frequenc
         sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (1, rank))
         sys.stderr.flush()
         for (k,v) in sorted(collocation_object['collocates'].items(), key=lambda x: x[1]['count'], reverse=True)[0:10]:
+            if k in forbidden_lemmas: continue
             collocations.append((lemma, k, v['count']))
 
     sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (4, '...finished'))
