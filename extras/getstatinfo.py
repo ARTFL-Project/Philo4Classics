@@ -34,7 +34,9 @@ def user_inputchoices(question, default_choice, all_choices):
     user_choice = ""
     while user_choice not in all_choices:
         user_choice = input(question % default_choice) or default_choice
-        if user_choice not in all_choices: eprint("Sorry, unknown. Select from listed choices.")
+        if not user_choice:
+            return default_choice
+        elif user_choice not in all_choices: eprint("Sorry, unknown. Select from listed choices.")
     return user_choice
 
 def user_setpath(question, default_choice="", path_suffix=""):
@@ -70,6 +72,35 @@ class AttrDict(dict):
     def __iter__(self):
           for each in [('author', ''),('philo_type', '')]:
               yield each
+
+def parse_urn(urn):
+    fields = urn.split(":")
+
+    collection = fields[2]
+
+    try:
+        group = ':'.join(fields[:4]).split('.')[0]
+    except Exception as e:
+        group = False
+
+    try:
+        group_id = ':'.join(fields[2:4]).split('.')[0]
+    except Exception as e:
+        group_id = False
+
+    try:
+        work = urn
+    except Exception as e:
+        work = False
+
+    try:
+        work_id = ':'.join([fields[2], fields[3].split('.')[1]])
+    except Exception as e:
+        work_id = False
+
+    return (collection, group, group_id, work, work_id)
+
+# Stat Functions #
 
 def get_lemma_ranks(cursor, cutoff=50):
     # count lemma instances
@@ -125,7 +156,7 @@ def get_collocations(cursor, tomsdb, lemmas_ranked, cutoff=6000, filter_frequenc
         #request.metadata = {'author': 'Aeschylus'}
         request.metadata = {}
         request['report'] = 'collocation'
-        request['q'] = '"' + lemma + '"'
+        request['q'] = 'lemma:' + lemma
         #request['author'] = 'Aeschylus'
         request['author'] = ''
         request['start'] = 0
@@ -136,13 +167,14 @@ def get_collocations(cursor, tomsdb, lemmas_ranked, cutoff=6000, filter_frequenc
         request['collocate_distance'] = '' 
         request['filter_frequency'] = filter_frequency
         request['max_time'] = ''
-        request['lemmas'] = "yes"
+        request['lemmas'] = "no"
 
         collocation_object = collocation_results(request, config)
         sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (1, rank))
         sys.stderr.flush()
         for (k,v) in sorted(collocation_object['collocates'].items(), key=lambda x: x[1]['count'], reverse=True)[0:10]:
             if k in forbidden_lemmas: continue
+            if k == lemma: continue
             collocations.append((lemma, k, v['count']))
 
     sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (4, '...finished'))
@@ -191,13 +223,19 @@ def get_lemmas_by_author(cursor, cutoff=5):
 
     # grab doc levels by author
     eprint("Grab docs and words by author...", end="", flush=True)
-    rows = cursor.execute('select author, philo_id, title from toms where philo_id like "% 0 0 0 0 0 0" and author is not null or title is not null;').fetchall()
+    rows = cursor.execute('select author, philo_id, title, cts_urn from toms where philo_id like "% 0 0 0 0 0 0" and author is not null or title is not null;').fetchall()
+    author_urns = {}
     docs_by_author = {}
     words_per_author = {}
     for row in rows:
         doc = row[1].split()[0]
         author = row[0] if row[0] else row[2]
         author = lump_texts(author)
+        (collection, group, group_id, work, work_id) = parse_urn(row[3])
+        urn = group
+
+        if urn not in author_urns:
+            author_urns[author] = urn
 
         # list docs per author and count total words per author
         if author not in docs_by_author:
@@ -248,7 +286,7 @@ def get_lemmas_by_author(cursor, cutoff=5):
         lemma_ratios_sorted = dict(sorted(lemma_ratios.items(), key=lambda item: item[1], reverse=True))
         rank = 1
         for author in lemma_ratios_sorted:
-            lemmas_by_author.append((lemma, rank, lemma_ratios_sorted[author], lemma_counts[author], author))
+            lemmas_by_author.append((lemma, rank, lemma_ratios_sorted[author], lemma_counts[author], author, author_urns[author]))
             if rank >= cutoff: break
             rank += 1
 
@@ -273,6 +311,9 @@ try:
         if sys.argv[i].lower() in possible_stats:
             stats = sys.argv[i]
             break
+    if not stats:
+        eprint("Unknown stat!")
+        stats = user_inputchoices("Which stats would you like to get [%s]? ", "all", possible_stats)
 except:
     stats = user_inputchoices("Which stats would you like to get [%s]? ", "all", possible_stats)
 
@@ -344,20 +385,33 @@ if stats == "lemmas_by_author" or stats == "all":
     if out in ["file"]:
         eprint("[Writing]     lemma ranks by author to [%s]..." % lemmas_by_author_file, end="", flush=True)
         f = open(lemmas_by_author_file, "w")
-        for (lemma, rank, percentage, count, author) in lemmas_by_author:
-            print("%s\t%d\t%s\t%f\t%d" % (lemma, rank, author, percentage, count), file=f)
+        for (lemma, rank, percentage, count, author, urn) in lemmas_by_author:
+            print("%s\t%d\t%s\t%f\t%s\t%d" % (lemma, rank, author, percentage, urn, count), file=f)
         f.close()
         eprint("finished")
 
     elif out in ["db", "sqlite"]:
-        eprint("[Deleting]     authorFreqs in [%s]..." % infodb, end="", flush=True)
         infoconn = sqlite3.connect(infodb)
         infocursor = infoconn.cursor()
-        infocursor.execute('delete from authorFreqs')
-        print("finished")
+
+        # check if cts_urn field exists
+        infocursor = infoconn.execute('select * from authorFreqs')
+        names = [description[0] for description in infocursor.description]
+        if "cts_urn" in names:
+            eprint("[Deleting]     authorFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('delete from authorFreqs')
+            print("finished")
+        else:
+            eprint("[Dropping]     authorFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('drop table authorFreqs')
+            eprint("finished")
+            eprint("[Creating]     authorFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('CREATE TABLE authorFreqs(lemma text, rank integer, author text, freq float, cts_urn text)')
+            eprint("finished")
+
         eprint("[Writing]     lemma ranks by author to [%s]..." % infodb, end="", flush=True)
-        for (lemma, rank, percentage, count, author) in lemmas_by_author:
-            infocursor.execute('insert into authorFreqs values (?,?,?,?)', (lemma, rank, author, f'{percentage:.10f}'))
+        for (lemma, rank, percentage, count, author, urn) in lemmas_by_author:
+            infocursor.execute('insert into authorFreqs values (?,?,?,?,?)', (lemma, rank, author, f'{percentage:.10f}', urn))
         eprint("finished")
         eprint("[Rebuilding   aF_l index...", end="", flush=True)
         infocursor.execute('drop index if exists aF_l')
@@ -367,8 +421,8 @@ if stats == "lemmas_by_author" or stats == "all":
         infoconn.close()
 
     elif out in ["text"]:
-        for (lemma, rank, percentage, count, author) in lemmas_by_author:
-            print("%s\t%d\t%s\t%f\t%d" % (lemma, rank, author, percentage, count))
+        for (lemma, rank, percentage, count, author, urn) in lemmas_by_author:
+            print("%s\t%d\t%s\t%f\t%s\t%d" % (lemma, rank, author, percentage, urn, count))
     eprint("")
 
 if stats == "collocations" or stats == "all":
@@ -405,3 +459,4 @@ if stats == "collocations" or stats == "all":
         for (lemma, collocate, count) in collocations:
             print("%s\t%s\t%d\t%s" % (lemma, collocate, count, lemma.rstrip(string.digits)))
     eprint("")
+
