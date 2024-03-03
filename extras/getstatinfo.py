@@ -16,6 +16,7 @@ tomsdb = "./toms.db"
 lemmas_file = "lemmas_ranked.txt"
 lemma_collocates_file = "lemma_collocates.txt"
 lemmas_by_author_file = "lemmas_by_author_ranked.txt"
+lemmas_by_text_file = "lemmas_by_text.txt"
 forbidden_lemmas = ['ΑΒΓ', 'segment', '<unknown>', 'unknown']
 #infodb = "/var/sqlite/logeion-dbs/GreekInfo.sqlite"
 infodb = "/home/waltms/GreekInfo.sqlite"
@@ -181,6 +182,61 @@ def get_collocations(cursor, tomsdb, lemmas_ranked, cutoff=6000, filter_frequenc
     eprint("")
     return collocations
 
+def get_lemmas_by_text(cursor, cutoff=5):
+
+    # grab doc level philo_id for all lemmas, grouped by lemma and philo_id
+    eprint("Counting lemma instances by doc...", end="", flush=True)
+    rows = cursor.execute("select lemma, substr(philo_id, 1, instr(philo_id, ' ')) from words where lemma !='' group by lemma, philo_id;").fetchall()
+    lemmas_by_doc = {}
+    for row in rows:
+        doc = row[1].strip(' ')
+        lemma = row[0]
+        if lemma in forbidden_lemmas: continue
+    
+        # count lemma instances per doc
+        if doc not in lemmas_by_doc:
+            lemmas_by_doc[doc] = {}
+        else:
+            if lemma not in lemmas_by_doc[doc]:
+                lemmas_by_doc[doc][lemma] = 1
+            else:
+                lemmas_by_doc[doc][lemma] += 1
+    lemmas_by_doc_sorted = {}
+    for doc in lemmas_by_doc.keys():
+        lemmas_by_doc_sorted[doc] = dict(sorted(lemmas_by_doc[doc].items(), key=lambda item: item[1], reverse=True))
+        lemmas_by_doc_sorted[doc] = {k:v for k,v in lemmas_by_doc_sorted[doc].items() if v > cutoff}
+        #print(lemmas_by_doc_sorted[doc])
+    eprint("done")
+
+    # grab total words per doc 
+    print("Counting words per doc...", end="", flush=True)
+    rows = cursor.execute("select lemma, substr(philo_id, 1, instr(philo_id, ' ')) from words where philo_type='word' and tokenid not null group by philo_id;").fetchall()
+    words_per_doc = {}
+    for row in rows:
+        doc = row[1].strip(' ')
+        lemma = row[0]
+        if lemma in forbidden_lemmas: continue
+        # count word instances per doc 
+        if doc not in words_per_doc:
+            words_per_doc[doc] = 1
+        else:
+            words_per_doc[doc] += 1
+    eprint("done")
+
+    eprint("Grab title and cts_urn by text...", end="", flush=True)
+    rows = cursor.execute('select philo_id, title, cts_urn from toms where philo_id like "% 0 0 0 0 0 0" and title is not null;').fetchall()
+    
+    lemmas_by_text = []
+    for row in rows:
+        doc = row[0].split()[0]
+        text = row[1]
+        cts_urn = row[2]
+        for lemma in lemmas_by_doc_sorted[doc]:
+            lemmas_by_text.append((lemma, lemmas_by_doc_sorted[doc][lemma], lemmas_by_doc_sorted[doc][lemma]/words_per_doc[doc], doc, text, cts_urn)) 
+
+    eprint("done")
+    return lemmas_by_text
+
 def get_lemmas_by_author(cursor, cutoff=5):
 
     # grab doc level philo_id for all lemmas, grouped by lemma and philo_id
@@ -304,7 +360,7 @@ while not os.path.exists(tomsdb):
     except:
         tomsdb = user_setpath("Please enter a path to toms.db: ", path_suffix="toms.db")
 
-possible_stats=["all", "collocations", "lemmas", "lemmas_by_author"]
+possible_stats=["all", "collocations", "lemmas", "lemmas_by_text", "lemmas_by_author"]
 stats = ""
 try:
     for i in range(1, 4):
@@ -376,6 +432,66 @@ if stats == "lemmas" or stats == "all":
     elif out in ["text"]:
         for (lemma, rank, count, rate) in lemmas_ranked:
             print("%s\t%s\t%d\t%.3f\t%s" % (lemma, rank, count, rate, lemma.rstrip(string.digits)))
+    eprint("")
+
+if stats == "lemmas_by_text" or states == "all":
+    # lemmas by text
+    lemmas_by_text = get_lemmas_by_text(cursor, 0)
+
+    if out in ["file"]:
+        eprint("[Writing]     lemma counts by text to [%s]..." % lemmas_by_text_file, end="", flush=True)
+        f = open(lemmas_by_text_file, "w")
+        for (lemma, count, rate, doc, text, urn) in lemmas_by_text:
+            print("%s\t%d\t%.7f\t%s\t%s\t%s" % (lemma, count, rate, doc, text, urn), file=f)
+            sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (1, doc))
+            sys.stderr.flush()
+        sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (3, '...finished'))
+        f.close()
+
+    elif out in ["db", "sqlite"]:
+        infoconn = sqlite3.connect(infodb)
+        infocursor = infoconn.cursor()
+
+        # check if cts_urn field exists
+        try:
+            infocursor = infoconn.execute('select * from textFreqs')
+        except sqlite3.OperationalError as e:
+            message = e.args[0]
+            if message.startswith("no such table"):
+                infocursor.execute('CREATE TABLE textFreqs(lemma text, count integer, ratio float, philo_id text, title text, cts_urn text)')
+                infoconn.commit()
+            else:
+                raise
+
+        names = [description[0] for description in infocursor.description]
+        if "cts_urn" in names:
+            eprint("[Deleting]     textFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('delete from textFreqs')
+            print("finished")
+        else:
+            eprint("[Dropping]     textFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('drop table textFreqs')
+            eprint("finished")
+            eprint("[Creating]     textFreqs in [%s]..." % infodb, end="", flush=True)
+            infocursor.execute('CREATE TABLE textFreqs(lemma text, count integer, ratio float, philo_id text, title text, cts_urn text)')
+            eprint("finished")
+
+        eprint("[Writing]     lemma counts by text to [%s]..." % infodb, end="", flush=True)
+        for (lemma, count, rate, doc, text, urn) in lemmas_by_text:
+            infocursor.execute('insert into textFreqs values (?,?,?,?,?,?)', (lemma, count, str(round(rate, 7)), doc, text, urn))
+            sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (1, doc))
+        sys.stderr.write("\x1b7\x1b[%dD%s\x1b8" % (3, '...finished'))
+        eprint("finished")
+        eprint("[Rebuilding]  dF_l index...", end="", flush=True)
+        infocursor.execute('drop index if exists dF_l')
+        infocursor.execute('CREATE INDEX dF_l on textFreqs(philo_id)')
+        eprint("finished")
+        infoconn.commit()
+        infoconn.close()
+
+    elif out in ["text"]:
+        for (lemma, count, percentage, doc, text, urn) in lemmas_by_text:
+            print("%s\t%d\t%f\t%s\t%s\t%s" % (lemma, count, percentage, doc, text, urn))
     eprint("")
 
 if stats == "lemmas_by_author" or stats == "all":
