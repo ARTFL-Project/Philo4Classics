@@ -434,7 +434,7 @@ if stats == "lemmas" or stats == "all":
             print("%s\t%s\t%d\t%.3f\t%s" % (lemma, rank, count, rate, lemma.rstrip(string.digits)))
     eprint("")
 
-if stats == "lemmas_by_text" or states == "all":
+if stats == "lemmas_by_text" or stats == "all":
     # lemmas by text
     lemmas_by_text = get_lemmas_by_text(cursor, 0)
 
